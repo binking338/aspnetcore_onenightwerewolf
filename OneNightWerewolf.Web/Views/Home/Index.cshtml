@@ -1,0 +1,330 @@
+﻿@model OneNightWerewolf.User;
+@{
+    ViewData["Title"] = "首页";
+}
+
+<div class="text-center">
+    <div id="ConfigContainer">
+        <h3><label>房间号：</label><input id="RoomId" type="text" value="@Model.RoomId" /><a id="Join" href="javascript:void(0)">进入</a><a id="Leave" href="javascript:void(0)">离开</a></h3>
+        <h3><label>角色牌：</label><input id="Roles" type="text" value="@ViewData["room.roles"]" /><a id="New" href="javascript:void(0)">创建</a></h3>
+    </div>
+    <h3>
+        <a id="Config" href="javascript:void(0)">设置</a>&nbsp;&nbsp;
+        @*<a id="Leave" href="javascript:void(0)">离开</a>&nbsp;&nbsp;*@
+        <a id="Start" href="javascript:void(0)">开始</a>&nbsp;&nbsp;
+        <a id="History" href="javascript:void(0)">历史</a>&nbsp;&nbsp;
+        <a id="MyOptions" href="javascript:void(0)">刷新</a><span id="CountDown" style="display:inline-block;width:2em"></span>
+    </h3>
+</div>
+<div id="RoleContainer" class="text-center">
+</div>
+<div id="PlayerContainer" class="text-center">
+</div>
+<div id="OptionContainer" class="text-center">
+</div>
+
+@section Scripts{
+<script type="text/javascript">$(function () {
+
+        function R(a, b) {
+            return parseInt(a + Math.random() * Math.abs(b - a));
+        }
+
+        function CountDown(t, cb) {
+            if (arguments.callee.handle) {
+                clearTimeout(arguments.callee.handle);
+            }
+            $("#CountDown").text("(" + t + ")");
+            arguments.callee.handle = setTimeout(function () {
+                if (t - 1 == 0) {
+                    $("#CountDown").text("");
+                    cb();
+                } else {
+                    CountDown(t - 1, cb);
+                }
+            }, 1000);
+        }
+
+        function GotoNextPhase() {
+            CountDown(3, function () {
+                MyOptions();
+            });
+        }
+
+        function MyOptions() {
+            Roles();
+            Players();
+            $.get("/api/game/myoptionsdesc", null)
+                .done(function (data) {
+                    if (data.code > 0) {
+                        if (data.code == 1) {
+                            // 没登录
+                            window.location = window.location;
+                        } else if (data.code == 7) {
+                            // 无房间
+                            RoomButtonConfig(false);
+                            $("#OptionContainer").html("")
+                        }
+                        //alert(data.message);
+                    } else {
+                        if (data.data == null || data.data.options == null || data.data.options.length == 0) {
+                            // 获取上次的信息
+                            MyLastOptionDesc();
+                            return;
+                        }
+                        if (data.data && data.data.options && data.data.options.length == 1) {
+                            // Action(0); // 自动选择
+                            // return;
+                        }
+
+                        var descs = data.data;
+                        $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
+                        descs.options.forEach(function (desc, i) {
+                            var btn = $("<a href='javascript:void(0)' />").text(desc);
+                            btn.click(function () {
+                                Action(i);
+                            });
+                            $("#OptionContainer").append($("<h3>").append(btn));
+                        });
+                        if (descs.phrase != '游戏开始' && descs.phrase != '游戏结束' && descs.phrase != '天亮了，请找出狼人') {
+                            CountDown(R(10, 15), function () {
+                                Action(R(0, descs.options.length));
+                            });
+                        }
+                    }
+                });
+        }
+
+        function MyLastOptionDesc() {
+            $.get("/api/game/mylastoptiondesc", null)
+                .done(function (data) {
+                    if (data.code > 0) {
+                        if (data.code == 1) {
+                            // 没登录
+                            window.location = window.location;
+                        } else if (data.code == 7) {
+                            // 无房间
+                            MyOptions();
+                            return;
+                        }
+                        //alert(data.message);
+                    } else {
+                        GotoNextPhase();
+                        if (data.data == null || data.data.options == null || data.data.options.length == 0) {
+                            $("#OptionContainer").html("")
+                            return;
+                        }
+
+                        var descs = data.data;
+                        $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
+                        $("#OptionContainer").append($("<h3>").html(descs.options[0].replace("=>", "：")));
+                    }
+                });
+        }
+
+        function Action(option) {
+            $.post("/api/game/action?no=" + option, null)
+                .done(function (data) {
+                    if (data.code > 0) {
+                        if (data.code == 1) {
+                            // 没登录
+                            window.location = window.location;
+                        } else if (data.code == 7) {
+                            // 无房间
+                            MyOptions();
+                            return;
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                    MyLastOptionDesc();
+                });
+        }
+
+        function History() {
+            $.get("/api/game/myinfo")
+                .done(function (data) {
+                    if (data.code > 0) {
+                    } else {
+                        alert(data.data);
+                    }
+                });
+        }
+
+        function Players() {
+            $.get("/api/game/players")
+                .done(function (data) {
+                    if (data.code > 0) {
+                        //alert(data.message);
+                        $("#PlayerContainer").html("").append("<br/>").append($("<h3>").html("请先加入房间"));
+                        RoomButtonConfig(false);
+                    } else {
+                        $("#PlayerContainer").html("<h6>玩家：</h6>");
+                        $("#PlayerContainer h6")
+                            .append(data.data.map(function (p, i) {
+                                if (i == 0) {
+                                    return $("<span>").append("[P" + p.seatNo + "]").append(p.userNick);
+                                } else {
+                                    var kickbtn = $("<a href='javascript:void(0)' />").append("[P" + p.seatNo + "]")
+                                        .click(function () { Kick(p); });
+                                    return $("<span>").append(",&nbsp;").append(kickbtn).append(p.userNick);
+                                }
+                            }));
+
+                    }
+                });
+        }
+
+        function Roles() {
+            $.get("/api/game/roles")
+                .done(function (data) {
+                    if (data.code > 0) {
+                        //alert(data.message);
+                        $("#RoleContainer").html("");
+                    } else {
+                        $("#RoleContainer").html("<br/><h6>角色：</h6>");
+                        $("#RoleContainer h6").append(data.data.join(",&nbsp;"));
+                    }
+                });
+        }
+
+        function Start() {
+            $.post("/api/game/start", null)
+                .done(function (data) {
+                    if (data.code > 0) {
+                        alert(data.message);
+                    } else {
+                        //$("#OptionContainer").html("").append($("<h3>").html("游戏已开始，请刷新"));
+                        //GotoNextPhase();
+                        MyOptions();
+                    }
+                });
+        }
+
+        function Leave() {
+            $.post("/api/game/leave", null)
+                .done(function (data) {
+                    if (data.code > 0) {
+                        alert(data.message);
+                    }
+                    RoomButtonConfig(false);
+                    MyOptions();
+                });
+        }
+
+        function Kick(player) {
+            if (window.confirm("确认踢出玩家：" + player.userNick)) {
+                $.post("/api/game/kick?seatNo=" + player.seatNo, null)
+                    .done(function (data) {
+                        if (data.code > 0) {
+                            alert(data.message);
+                        } else {
+                            MyOptions();
+                        }
+                    });
+            }
+        }
+
+        function Join() {
+            var roomId = $("#RoomId").val();
+            var roles = $("#Roles").val();
+            if (!roomId) {
+                $("#RoomId").focus();
+                return;
+            }
+            $.post("/api/game/join?roomId=" + encodeURIComponent(roomId), null)
+                .done(function (data) {
+                    if (data.code > 0) {
+                        $("#Roles").focus();
+                        alert(data.message);
+                    } else {
+                        RoomButtonConfig(true);
+                        Config();
+                        MyOptions();
+                    }
+                });
+        }
+
+        function New() {
+            var roomId = $("#RoomId").val();
+            var roles = $("#Roles").val();
+            if (!roomId) {
+                $("#RoomId").focus();
+                return;
+            }
+            if (!roles) {
+                $("#Roles").focus();
+                return;
+            }
+            try {
+                roles = roles.split(',').map(i => parseInt(i));
+            }
+            catch (e) {
+                $("#Roles").focus();
+                return;
+            }
+            $.ajax({
+                type: 'POST',
+                url: "/api/game/new?roomId=" + encodeURIComponent(roomId),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(roles),
+                success: function (data) {
+                    if (data.code > 0) {
+                        $("#Roles").focus();
+                        alert(data.message);
+                    } else {
+                        RoomButtonConfig(true);
+                        Config();
+                        MyOptions();
+                    }
+                }
+            });
+
+        }
+
+        function Config() {
+            $("#ConfigContainer").slideToggle();
+        }
+
+        function RoomButtonConfig(isEnter) {
+            if (isEnter) {
+                $('#Join').hide();
+                $('#Leave').show();
+            } else {
+                $('#Join').show();
+                $('#Leave').hide();
+            }
+        }
+
+        $('#Join').click(Join);
+        $('#New').click(New);
+        $('#Start').click(Start);
+        $('#Leave').click(Leave);
+        $('#MyOptions').click(MyOptions);
+        $('#History').click(History);
+        $('#Config').click(Config);
+        $(document).keydown(function (event) {
+            if (event.keyCode == 13) {
+                var a = $('input:select');
+                $('#Join').triggerHandler('click');
+            }
+        });
+        $('#MyOptions').click();
+    });</script>
+
+
+    @if (!string.IsNullOrEmpty(Model.RoomId))
+    {
+    <script type="text/javascript">$(function () {
+        $('#ConfigContainer').hide();
+        $('#Join').hide();
+    });</script>
+    }
+    else
+    {
+    <script type="text/javascript">$(function () {
+            $('#Leave').hide();
+        });</script>
+    }
+}

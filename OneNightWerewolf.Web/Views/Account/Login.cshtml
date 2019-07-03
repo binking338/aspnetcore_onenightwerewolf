@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="text-center">
+    <h1 class="display-4">登录</h1>
+    <h3>
+        <label>昵称：</label><input id="Nick" type="text" /> <a id="Submit" href="javascript:void(0)">加入</a>
+    </h3>
+
+</div>
+
+@section Scripts{
+<script type="text/javascript">$(function () {
+        function Login() {
+            var nick = $("#Nick").val();
+            if (!nick) {
+                $("#Nick").focus();
+                return;
+            }
+            $.post("/api/user/signin?nick=" + encodeURIComponent(nick), null)
+                .done(function (data) {
+                    window.location = "/";
+                });
+        }
+
+        $("#Submit").click(Login);
+        $(document).keydown(function (event) {
+            if (event.keyCode == 13) {
+                $('#Submit').triggerHandler('click');
+            }
+        });
+    });</script>
+}

@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="text-center">
+    <h1 class="display-4">退出中...</h1>
+    <p></p>
+
+</div>
+@section Scripts{
+    <script type="text/javascript">
+    $.post('/api/user/logout', null, function () {
+        window.location = '/';
+    });
+    </script> 
+}
