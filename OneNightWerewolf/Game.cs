@@ -634,8 +634,9 @@ namespace OneNightWerewolf
                             seat.DeadReason = DeadReason.Vote;
                             if (GetPlayRole(seat.Card) == GameRole.Hunter)
                             {
-                                Room.StateStack.Last().Seats.Values.ToList().ForEach(voteSeat => {
-                                    if (voteSeat.No >= 0 && Convert.ToInt32(voteSeat.Option.Arguments[0]) == seat.No)
+                                Room.StateStack.Last().Seats.Values.ToList().ForEach(voteSeat =>
+                                {
+                                    if (voteSeat.No >= 0 && voteSeat.No == Convert.ToInt32(seat.Option.Arguments[0]))
                                     {
                                         voteSeat.Dead = true;
                                         voteSeat.DeadReason = DeadReason.Hunter;
