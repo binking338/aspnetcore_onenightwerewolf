@@ -903,6 +903,7 @@ namespace OneNightWerewolf
                     return GetRoleDesc((GameRole)Convert.ToInt32(option.Result[0]));
 
                 case GameCommand.Locate:
+                    if (option.Result.Length == 0) return "无";
                     var seatNos = option.Result.Select(a=>Convert.ToInt32(a));
                     var playerInfo = string.Join(" 和 ", seatNos.Select(seatNo => {
                         var player = GetPlayerBySeatNo(seatNo);
