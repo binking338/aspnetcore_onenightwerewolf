@@ -693,7 +693,7 @@ namespace OneNightWerewolf
             clone.Seats = new Dictionary<int, GameSeat>();
             foreach (var seat in state.Seats.Values)
             {
-                clone.Seats.Add(seat.No, new GameSeat() { No = seat.No, Card = seat.Card, Vote = seat.Vote, Dead = seat.Dead, Win = seat.Win });
+                clone.Seats.Add(seat.No, new GameSeat() { No = seat.No, Card = seat.Card, Vote = seat.Vote, Dead = seat.Dead, Win = seat.Win, DeadReason = seat.DeadReason });
             }
             return clone;
         }
@@ -765,18 +765,26 @@ namespace OneNightWerewolf
                 .Where(seat => seat.No >= 0
                     && GetPlayRole(seat.Card) == GameRole.Minion)
                 .All(seat => !seat.Dead);
-                if (!noneMinionDead) werewolfWin = false;
-
-                var deadCount = Room.StateStack.Last().Seats.Values
-                        .Where(seat => seat.Dead).Count();
-                if (deadCount == 0) werewolfWin = true;
+                if (!noneMinionDead)
+                {
+                    werewolfWin = false;
+                }
                 else
                 {
-                    var onlyTannerDead = Room.StateStack.Last().Seats.Values
-                            .Where(seat => seat.Dead)
-                            .All(seat => GetPlayRole(seat.Card) == GameRole.Tanner);
-                    if (onlyTannerDead) werewolfWin = false;
-                    else werewolfWin = true;
+                    var deadCount = Room.StateStack.Last().Seats.Values
+                            .Where(seat => seat.Dead).Count();
+                    if (deadCount == 0)
+                    {
+                        werewolfWin = true;
+                    }
+                    else
+                    {
+                        var onlyTannerDead = Room.StateStack.Last().Seats.Values
+                                .Where(seat => seat.Dead)
+                                .All(seat => GetPlayRole(seat.Card) == GameRole.Tanner);
+                        if (onlyTannerDead) werewolfWin = false;
+                        else werewolfWin = true;
+                    }
                 }
                 return werewolfWin;
             }
@@ -786,17 +794,26 @@ namespace OneNightWerewolf
                 var noneWerewolfDead = Room.StateStack.Last().Seats.Values
                     .Where(seat => seat.No >= 0 && GetPlayRole(seat.Card) == GameRole.Werewolf)
                     .All(seat => !seat.Dead);
-                if (!noneWerewolfDead) werewolfWin = false;
-                var deadCount = Room.StateStack.Last().Seats.Values
-                        .Where(seat => seat.Dead).Count();
-                if (deadCount == 0) werewolfWin = true;
+                if (!noneWerewolfDead)
+                {
+                    werewolfWin = false;
+                }
                 else
                 {
-                    var onlyTannerDead = Room.StateStack.Last().Seats.Values
-                            .Where(seat => seat.Dead)
-                            .All(seat => GetPlayRole(seat.Card) == GameRole.Tanner);
-                    if (onlyTannerDead) werewolfWin = false;
-                    else werewolfWin = true;
+                    var deadCount = Room.StateStack.Last().Seats.Values
+                            .Where(seat => seat.Dead).Count();
+                    if (deadCount == 0)
+                    {
+                        werewolfWin = true;
+                    }
+                    else
+                    {
+                        var onlyTannerDead = Room.StateStack.Last().Seats.Values
+                                .Where(seat => seat.Dead)
+                                .All(seat => GetPlayRole(seat.Card) == GameRole.Tanner);
+                        if (onlyTannerDead) werewolfWin = false;
+                        else werewolfWin = true;
+                    }
                 }
                 return werewolfWin;
             }
@@ -891,6 +908,20 @@ namespace OneNightWerewolf
             return phase.ToString();
         }
 
+        public string GetDeadReasonDesc(DeadReason deadReason)
+        {
+            switch(deadReason)
+            {
+                case DeadReason.None:
+                    return "无";
+                case DeadReason.Hunter:
+                    return "猎人";
+                case DeadReason.Vote:
+                    return "投票";
+            }
+            return "";
+        }
+
         public string GetOptionResultDesc(GameOption option)
         {
             switch (option.Command)
@@ -919,31 +950,26 @@ namespace OneNightWerewolf
                 case GameCommand.None:
                     return $"完成";
                 case GameCommand.Result:
+                    var win = (bool)option.Result[0];
                     var roleName = GetRoleDesc((GameRole)Convert.ToInt32(option.Result[1]));
                     if(option.Result[1] != option.Result[2])
                     {
                         roleName = GetRoleDesc((GameRole)Convert.ToInt32(option.Result[2]));
                     }
-                    var status = "";
-                    if ((bool)option.Result[3])
-                    {
-                        var reason =(DeadReason)Convert.ToInt32(option.Result[4]);
-                        status = "死于";
-                        if(reason == DeadReason.Hunter)
-                        {
-                            status += "猎人";
-                        }
-                        if(reason == DeadReason.Vote)
-                        {
-                            status += "投票";
-                        }
-                    }
-                    else
-                    {
-                        status = "幸存";
-
-                    }
-                    return $"{((bool)option.Result[0]?"胜利":"失败")}[{roleName}{status}]";
+                    var reason = (DeadReason)Convert.ToInt32(option.Result[4]);
+                    var liveness = (bool)option.Result[3] ? "死于"+ GetDeadReasonDesc(reason) : "幸存";
+                    var result = $"{liveness}的{roleName},{(win ? "胜利" : "失败")}!";
+                    result += "\n";
+                    Room.StateStack.Last().Seats.Values.Where(seat=>seat.No>=0).ToList()
+                        .ForEach(seat => {
+                            var player = GetPlayerBySeatNo(seat.No);
+                            var playerRoleName = GetRoleDesc(GetPlayRole(seat.Card));
+                            var vote = player.HistoryOptions.FirstOrDefault(op => op.Command == GameCommand.Vote);
+                            var voteSeatNo = Convert.ToInt32(vote?.Arguments[0]);
+                            var voteUserNick = GetPlayerBySeatNo(voteSeatNo).UserNick;
+                            result += $"\n[P{seat.No}]{player.UserNick}是{playerRoleName}，共获{seat.Vote}票，投杀[P{voteSeatNo}]{voteUserNick}，{(seat.Dead ? "死于"+GetDeadReasonDesc(seat.DeadReason) : "幸存")}。";
+                        });
+                    return result;
             }
             return "";
         }
@@ -1007,7 +1033,7 @@ namespace OneNightWerewolf
                     }));
                     return $"投 {playerInfo}";
                 case GameCommand.Result:
-                    return "游戏结果";
+                    return "结果";
                 case GameCommand.None:
                     return "无行动";
             }
