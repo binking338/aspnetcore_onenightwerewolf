@@ -81,9 +81,17 @@
                         $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
                         descs.options.forEach(function (desc, i) {
                             var btn = $("<a href='javascript:void(0)' />").text(desc);
-                            btn.click(function () {
-                                Action(i);
-                            });
+                            if(descs.phrase == '天亮了，请找出狼人'){
+                                btn.click(function () {
+                                    if(window.confirm("确定"+desc+"?")){
+                                        Action(i);
+                                    }
+                                });
+                            } else {
+                                btn.click(function () {
+                                    Action(i);
+                                });
+                            }
                             $("#OptionContainer").append($("<h3>").append(btn));
                         });
                         if (descs.phrase != '游戏开始' && descs.phrase != '游戏结束' && descs.phrase != '天亮了，请找出狼人') {
@@ -117,7 +125,11 @@
 
                         var descs = data.data;
                         $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
-                        $("#OptionContainer").append($("<h3>").html(descs.options[0].replace("=>", "：")));
+                        var actionResult = descs.options[0].split("\n\n");
+                        $("#OptionContainer").append($("<h3>").html(actionResult[0].replace("=>", "：")));
+                        if(actionResult.length>1)
+                            $("#OptionContainer").append(actionResult[1].replace(/\n/g,"<br/>"));
+
                     }
                 });
         }
