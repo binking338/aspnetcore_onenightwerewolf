@@ -5,11 +5,9 @@ namespace OneNightWerewolf
     {
         None,
         Identify,
-        Locate,
-        See,
-        Rob,
         Exchange,
-        Drunk,
+        Rob,
+        Locate,
         Feign,
         Vote,
         Result,

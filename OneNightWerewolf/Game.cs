@@ -352,14 +352,14 @@ namespace OneNightWerewolf
                             {
                                 for(var j = i+1;j<=CENTER_CARD_NUM;j++)
                                 {
-                                    options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.See, Arguments = new object[] { -i, -j } });
+                                    options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Identify, Arguments = new object[] { -i, -j } });
                                 }
                             }
                             for (var no = 0; no < playerCount; no++)
                             {
                                 if (no != initSeat.No)
                                 {
-                                    options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.See, Arguments = new object[] { no } });
+                                    options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Identify, Arguments = new object[] { no } });
                                 }
                             }
                         }
@@ -389,7 +389,7 @@ namespace OneNightWerewolf
                         {
                             for(var i= 1; i <= CENTER_CARD_NUM; i++)
                             {
-                                options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Drunk, Arguments = new object[] { initSeat.No, -i } });
+                                options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Exchange, Arguments = new object[] { initSeat.No, -i } });
                             }
                         }
                         else if (GetPlayRole(initSeat.Card)  == GameRole.Minion)
@@ -407,7 +407,7 @@ namespace OneNightWerewolf
                         {
                             for(var i = 1; i <= CENTER_CARD_NUM; i++)
                             {
-                                options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.See, Arguments = new object[] { -i } });
+                                options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Identify, Arguments = new object[] { -i } });
                             }
                         }
                         else
@@ -436,14 +436,14 @@ namespace OneNightWerewolf
                         {
                             for (var j = i + 1; j <= CENTER_CARD_NUM; j++)
                             {
-                                options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.See, Arguments = new object[] { -i, -j } });
+                                options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Identify, Arguments = new object[] { -i, -j } });
                             }
                         }
                         for (var no = 0; no < playerCount; no++)
                         {
                             if (no != initSeat.No)
                             {
-                                options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.See, Arguments = new object[] { no } });
+                                options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Identify, Arguments = new object[] { no } });
                             }
                         }
                     }
@@ -479,7 +479,7 @@ namespace OneNightWerewolf
                     {
                         for (var i = 1; i <= CENTER_CARD_NUM; i++)
                         {
-                            options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Drunk, Arguments = new object[] { initSeat.No, -i } });
+                            options.Add(new GameOption() { Phase = gamePhase, Command = GameCommand.Exchange, Arguments = new object[] { initSeat.No, -i } });
                         }
                     }
                     break;
@@ -538,7 +538,6 @@ namespace OneNightWerewolf
             switch (option.Command)
             {
                 case GameCommand.Identify:
-                case GameCommand.See:
                     seatNos = option.Arguments.Select(a => Convert.ToInt32(a)).ToList();
                     var roles = new object[seatNos.Count];
                     if (seatNos.Count > 0)
@@ -586,7 +585,6 @@ namespace OneNightWerewolf
                     seat1.Card = cardTemp;
                     option.Result = new object[] { seat0.Card.Role };
                     break;
-                case GameCommand.Drunk:
                 case GameCommand.Exchange:
                     seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
                     seat0 = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[0] == seat.No);
@@ -927,7 +925,6 @@ namespace OneNightWerewolf
             switch (option.Command)
             {
                 case GameCommand.Identify:
-                case GameCommand.See:
                     var roles = option.Result.Select(a=>Convert.ToInt32(a)).Cast<GameRole>();
                     var roleInfo = string.Join(" 和 ", roles.Select(role => GetRoleDesc(role)));
                     return $"{roleInfo}";
@@ -945,7 +942,6 @@ namespace OneNightWerewolf
                 case GameCommand.Rob:
                     return $"新身份是[{GetRoleDesc((GameRole)Convert.ToInt32(option.Result[0]))}]";
                 case GameCommand.Exchange:
-                case GameCommand.Drunk:
                 case GameCommand.Vote:
                 case GameCommand.None:
                     return $"完成";
@@ -981,21 +977,26 @@ namespace OneNightWerewolf
             switch (option.Command)
             {
                 case GameCommand.Identify:
-                    return $"我的身份";
-                case GameCommand.See:
-                    seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
-                    playerInfo = string.Join(" 和 ", seatNos.Select(seatNo => {
-                        if (seatNo < 0)
-                        {
-                            return $"[中{-seatNo}]";
-                        }
-                        else
-                        {
-                            var player = GetPlayerBySeatNo(seatNo);
-                            return $"[P{player.SeatNo}]{player.UserNick}";
-                        }
-                    }));
-                    return $"查看 {playerInfo}";
+                    if(option.Phase == GamePhase.Day)
+                    {
+                        return $"我的身份";
+                    }
+                    else
+                    {
+                        seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
+                        playerInfo = string.Join(" 和 ", seatNos.Select(seatNo => {
+                            if (seatNo < 0)
+                            {
+                                return $"[中{-seatNo}]";
+                            }
+                            else
+                            {
+                                var player = GetPlayerBySeatNo(seatNo);
+                                return $"[P{player.SeatNo}]{player.UserNick}";
+                            }
+                        }));
+                        return $"查看 {playerInfo}";
+                    }
                 case GameCommand.Feign:
                     seatNos = option.Arguments.Select(a => Convert.ToInt32(a)).ToList();
                     return $"化身为 [P{seatNos[1]}]{GetPlayerBySeatNo(seatNos[1]).UserNick}";
@@ -1013,18 +1014,21 @@ namespace OneNightWerewolf
                 case GameCommand.Rob:
                     seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
                     return $"与 [P{seatNos[1]}]{GetPlayerBySeatNo(seatNos[1]).UserNick} 交换";
-                case GameCommand.Drunk:
-                    seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
-
-                    return $"与 [中{-seatNos[1]}]交换";
                 case GameCommand.Exchange:
-                    seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
-
-                    playerInfo = string.Join(" 和 ", seatNos.Select(seatNo => {
-                        var player = GetPlayerBySeatNo(seatNo);
-                        return $"[P{player.SeatNo}]{player.UserNick}";
-                    }));
-                    return $"交换 {playerInfo} ";
+                    if(option.Phase == GamePhase.NightDrunk)
+                    {
+                        seatNos = option.Arguments.Select(a => Convert.ToInt32(a)).ToList();
+                        return $"与 [中{-seatNos[1]}]交换";
+                    }
+                    else
+                    {
+                        seatNos = option.Arguments.Select(a => Convert.ToInt32(a)).ToList();
+                        playerInfo = string.Join(" 和 ", seatNos.Select(seatNo => {
+                            var player = GetPlayerBySeatNo(seatNo);
+                            return $"[P{player.SeatNo}]{player.UserNick}";
+                        }));
+                        return $"交换 {playerInfo} ";
+                    }
                 case GameCommand.Vote:
                     seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
                     playerInfo = string.Join(" 和 ", seatNos.Select(seatNo => {
