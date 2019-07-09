@@ -218,7 +218,7 @@ namespace OneNightWerewolf
             for (var i = -CENTER_CARD_NUM; cards.Count > 0; i++)
             {
                 int cardIdx = random.Next(cards.Count);
-                gameState.Seats.Add(i, new GameSeat() { No = i, Card = cards[cardIdx], Dead = false, DeadReason = DeadReason.None, Win = false, Option = null, Vote = 0 });
+                gameState.Seats.Add(new GameSeat() { No = i, Card = cards[cardIdx], Dead = false, DeadReason = DeadReason.None, Win = false, Option = null, Vote = 0 });
                 cards.RemoveAt(cardIdx);
             }
             Room.StateStack.Add(gameState);
@@ -250,8 +250,8 @@ namespace OneNightWerewolf
 
         protected List<GameOption> GetOptionsAtStart(int seatNo)
         {
-            var initSeat = Room.StateStack.First().Seats[seatNo];
-            var currSeat = Room.StateStack.Last().Seats[seatNo];
+            var initSeat = Room.StateStack.First().Seats.FirstOrDefault(seat => seat.No == seatNo);
+            var currSeat = Room.StateStack.Last().Seats.FirstOrDefault(seat => seat.No == seatNo);
             if(currSeat.Option != null) 
             {
                 return new List<GameOption>();
@@ -268,8 +268,8 @@ namespace OneNightWerewolf
             {
                 return new List<GameOption>();
             }
-            var initSeat = Room.StateStack.First().Seats[seatNo];
-            var currSeat = Room.StateStack.Last().Seats[seatNo];
+            var initSeat = Room.StateStack.First().Seats.FirstOrDefault(seat => seat.No == seatNo);
+            var currSeat = Room.StateStack.Last().Seats.FirstOrDefault(seat => seat.No == seatNo);
             if (currSeat.Option != null)
             {
                 return new List<GameOption>();
@@ -282,8 +282,8 @@ namespace OneNightWerewolf
 
         protected List<GameOption> GetOptionsAtDay(int seatNo)
         {
-            var initSeat = Room.StateStack.First().Seats[seatNo];
-            var currSeat = Room.StateStack.Last().Seats[seatNo];
+            var initSeat = Room.StateStack.First().Seats.FirstOrDefault(seat => seat.No == seatNo);
+            var currSeat = Room.StateStack.Last().Seats.FirstOrDefault(seat => seat.No == seatNo);
             var playerCount = Room.Cards.Count - CENTER_CARD_NUM;
             if (currSeat.Option != null)
             {
@@ -318,8 +318,8 @@ namespace OneNightWerewolf
 
         protected List<GameOption> GetOptionsAtNight(int seatNo)
         {
-            var initSeat = Room.StateStack.First().Seats[seatNo];
-            var currSeat = Room.StateStack.Last().Seats[seatNo];
+            var initSeat = Room.StateStack.First().Seats.FirstOrDefault(seat => seat.No == seatNo);
+            var currSeat = Room.StateStack.Last().Seats.FirstOrDefault(seat => seat.No == seatNo);
             var playerCount = Room.Cards.Count - CENTER_CARD_NUM;
             if (currSeat.Option != null)
             {
@@ -401,7 +401,7 @@ namespace OneNightWerewolf
 
                 case GamePhase.NightWerewolf:
                     if (initSeat.Card.Role == GameRole.Werewolf || initSeat.Card.Extra == GameRole.Werewolf.ToString()) {
-                        var aloneWerewolf = Room.StateStack.First().Seats.Values
+                        var aloneWerewolf = Room.StateStack.First().Seats
                             .Count(seat => seat.No >= 0 && GetPlayRole(seat.Card) == GameRole.Werewolf) == 1;
                         if (aloneWerewolf)
                         {
@@ -522,12 +522,12 @@ namespace OneNightWerewolf
 
         protected bool CanNextPhase()
         {
-            return Room.StateStack.Last().Seats.Values.All(seat => seat.No < 0 || seat.Option != null);
+            return Room.StateStack.Last().Seats.All(seat => seat.No < 0 || seat.Option != null);
         }
 
         public GameOption Action(int seatNo, GameOption option)
         {
-            var currentSeat = Room.StateStack.Last().Seats[seatNo];
+            var currentSeat = Room.StateStack.Last().Seats.FirstOrDefault(seat => seat.No == seatNo);
             if (currentSeat.Option != null) return currentSeat.Option;
 
 
@@ -545,22 +545,22 @@ namespace OneNightWerewolf
                     {
                         for(var i = 0; i < seatNos.Count; i++)
                         {
-                            roles[i] = Room.StateStack.Last().Seats.Values.FirstOrDefault(seat => seatNos[i] == seat.No).Card.Role;
+                            roles[i] = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[i] == seat.No).Card.Role;
                         }
                     }
                     option.Result = roles;
                     break;
                 case GameCommand.Feign:
                     seatNos = option.Arguments.Select(a => Convert.ToInt32(a)).ToList();
-                    seat0 = Room.StateStack.Last().Seats.Values.FirstOrDefault(seat => seatNos[0] == seat.No);
-                    seat1 = Room.StateStack.Last().Seats.Values.FirstOrDefault(seat => seatNos[1] == seat.No);
+                    seat0 = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[0] == seat.No);
+                    seat1 = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[1] == seat.No);
                     seat0.Card.Extra = seat1.Card.Role.ToString();
                     option.Result = new object[] { seat1.Card.Role };
                     break;
                 case GameCommand.Locate:
                     if((GameRole)Convert.ToInt32(option.Arguments[0]) == GameRole.Werewolf)
                     {
-                        var seats = Room.StateStack.First().Seats.Values
+                        var seats = Room.StateStack.First().Seats
                             .Where(seat => seat.No != seatNo && seat.No >= 0 
                                         && GetPlayRole(seat.Card) == GameRole.Werewolf)
                             .ToList();
@@ -569,7 +569,7 @@ namespace OneNightWerewolf
                     }
                     else if((GameRole)Convert.ToInt32(option.Arguments[0]) == GameRole.Masons)
                     {
-                        var seats = Room.StateStack.First().Seats.Values
+                        var seats = Room.StateStack.First().Seats
                             .Where(seat => seat.No != seatNo && seat.No >= 0 
                                         && GetPlayRole(seat.Card) == GameRole.Masons )
                             .ToList();
@@ -579,8 +579,8 @@ namespace OneNightWerewolf
                     break;
                 case GameCommand.Rob:
                     seatNos = option.Arguments.Select(a => Convert.ToInt32(a)).ToList();
-                    seat0 = Room.StateStack.Last().Seats.Values.FirstOrDefault(seat => seatNos[0] == seat.No);
-                    seat1 = Room.StateStack.Last().Seats.Values.FirstOrDefault(seat => seatNos[1] == seat.No);
+                    seat0 = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[0] == seat.No);
+                    seat1 = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[1] == seat.No);
                     cardTemp = seat0.Card;
                     seat0.Card = seat1.Card;
                     seat1.Card = cardTemp;
@@ -589,8 +589,8 @@ namespace OneNightWerewolf
                 case GameCommand.Drunk:
                 case GameCommand.Exchange:
                     seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
-                    seat0 = Room.StateStack.Last().Seats.Values.FirstOrDefault(seat => seatNos[0] == seat.No);
-                    seat1 = Room.StateStack.Last().Seats.Values.FirstOrDefault(seat => seatNos[1] == seat.No);
+                    seat0 = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[0] == seat.No);
+                    seat1 = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[1] == seat.No);
                     cardTemp = seat0.Card;
                     seat0.Card = seat1.Card;
                     seat1.Card = cardTemp;
@@ -598,7 +598,7 @@ namespace OneNightWerewolf
                     break;
                 case GameCommand.Vote:
                     seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
-                    Room.StateStack.Last().Seats.Values.ToList().ForEach(seat =>
+                    Room.StateStack.Last().Seats.ForEach(seat =>
                     {
                         if (seatNos.Contains(seat.No))
                         {
@@ -609,7 +609,7 @@ namespace OneNightWerewolf
                     break;
                 case GameCommand.Result:
                     seatNos = option.Arguments.Select(a=>Convert.ToInt32(a)).ToList();
-                    seat0 = Room.StateStack.Last().Seats.Values.FirstOrDefault(seat => seatNos[0] == seat.No);
+                    seat0 = Room.StateStack.Last().Seats.FirstOrDefault(seat => seatNos[0] == seat.No);
                     option.Result = new object[] { seat0.Win, seat0.Card.Role, GetPlayRole(seat0.Card), seat0.Dead, seat0.DeadReason};
                     break;
                 case GameCommand.None:
@@ -625,16 +625,16 @@ namespace OneNightWerewolf
             if (CanNextPhase()) {
                 if (GetCurrentPhase() == GamePhase.Day)
                 {
-                    var maxVote = Room.StateStack.Last().Seats.Values.Max(seat => seat.Vote);
+                    var maxVote = Room.StateStack.Last().Seats.Max(seat => seat.Vote);
                     if(maxVote > 1)
                     {
-                        var deadSeats = Room.StateStack.Last().Seats.Values.Where(seat => seat.Vote == maxVote).ToList();
+                        var deadSeats = Room.StateStack.Last().Seats.Where(seat => seat.Vote == maxVote).ToList();
                         deadSeats.ForEach(seat => {
                             seat.Dead = true;
                             seat.DeadReason = DeadReason.Vote;
                             if (GetPlayRole(seat.Card) == GameRole.Hunter)
                             {
-                                Room.StateStack.Last().Seats.Values.ToList().ForEach(voteSeat =>
+                                Room.StateStack.Last().Seats.ForEach(voteSeat =>
                                 {
                                     if (voteSeat.No >= 0 && voteSeat.No == Convert.ToInt32(seat.Option.Arguments[0]))
                                     {
@@ -647,7 +647,7 @@ namespace OneNightWerewolf
                     }
                     var isVillageWin = JudgeVillageWin();
                     var isWerewolfWin = JudgeWerewolfWin();
-                    Room.StateStack.Last().Seats.Values.ToList().ForEach(seat => { 
+                    Room.StateStack.Last().Seats.ForEach(seat => { 
                         switch(seat.Card.Role)
                         {
                             case GameRole.Tanner:
@@ -690,17 +690,17 @@ namespace OneNightWerewolf
         protected GameState CloneGameState(GameState state)
         {
             var clone = new GameState();
-            clone.Seats = new Dictionary<int, GameSeat>();
-            foreach (var seat in state.Seats.Values)
+            clone.Seats = new List<GameSeat>();
+            foreach (var seat in state.Seats)
             {
-                clone.Seats.Add(seat.No, new GameSeat() { No = seat.No, Card = seat.Card, Vote = seat.Vote, Dead = seat.Dead, Win = seat.Win, DeadReason = seat.DeadReason });
+                clone.Seats.Add(new GameSeat() { No = seat.No, Card = seat.Card, Vote = seat.Vote, Dead = seat.Dead, Win = seat.Win, DeadReason = seat.DeadReason });
             }
             return clone;
         }
 
         protected bool IsNoneWerewolf()
         {
-            var noneWerewolf = Room.StateStack.Last().Seats.Values
+            var noneWerewolf = Room.StateStack.Last().Seats
                 .Where(seat => seat.No >= 0)
                 .All(seat => GetPlayRole(seat.Card) != GameRole.Werewolf);
 
@@ -709,7 +709,7 @@ namespace OneNightWerewolf
 
         protected bool IsNoneMinion()
         {
-            var noneMinion = Room.StateStack.Last().Seats.Values
+            var noneMinion = Room.StateStack.Last().Seats
                 .Where(seat => seat.No >= 0)
                 .All(seat => GetPlayRole(seat.Card) != GameRole.Minion);
 
@@ -723,14 +723,14 @@ namespace OneNightWerewolf
             if(noneWerewolf && noneMinion)
             {
                 // 没狼人，没爪牙：不能死人
-                var villageWin = Room.StateStack.Last().Seats.Values
+                var villageWin = Room.StateStack.Last().Seats
                     .All(seat => !seat.Dead);
                 return villageWin;
             }
             else if (noneWerewolf && !noneMinion)
             {
                 // 没狼人，有爪牙：死一个爪牙
-                var villageWin = Room.StateStack.Last().Seats.Values
+                var villageWin = Room.StateStack.Last().Seats
                     .Where(seat => seat.No >= 0 
                         && GetPlayRole(seat.Card) == GameRole.Minion)
                     .Any(seat => seat.Dead);
@@ -739,7 +739,7 @@ namespace OneNightWerewolf
             else
             {
                 // 有狼人：死一个狼人
-                var villageWin = Room.StateStack.Last().Seats.Values
+                var villageWin = Room.StateStack.Last().Seats
                     .Where(seat => seat.No >= 0
                         && GetPlayRole(seat.Card) == GameRole.Werewolf)
                     .Any(seat => seat.Dead);
@@ -761,7 +761,7 @@ namespace OneNightWerewolf
             else if (noneWerewolf && !noneMinion)
             {
                 // 没狼人，有爪牙：没爪牙死 且 不能只死了皮匠
-                var noneMinionDead = Room.StateStack.Last().Seats.Values
+                var noneMinionDead = Room.StateStack.Last().Seats
                 .Where(seat => seat.No >= 0
                     && GetPlayRole(seat.Card) == GameRole.Minion)
                 .All(seat => !seat.Dead);
@@ -771,7 +771,7 @@ namespace OneNightWerewolf
                 }
                 else
                 {
-                    var deadCount = Room.StateStack.Last().Seats.Values
+                    var deadCount = Room.StateStack.Last().Seats
                             .Where(seat => seat.Dead).Count();
                     if (deadCount == 0)
                     {
@@ -779,7 +779,7 @@ namespace OneNightWerewolf
                     }
                     else
                     {
-                        var onlyTannerDead = Room.StateStack.Last().Seats.Values
+                        var onlyTannerDead = Room.StateStack.Last().Seats
                                 .Where(seat => seat.Dead)
                                 .All(seat => GetPlayRole(seat.Card) == GameRole.Tanner);
                         if (onlyTannerDead) werewolfWin = false;
@@ -791,7 +791,7 @@ namespace OneNightWerewolf
             else
             {
                 // 有狼人：没狼人死 且 不能只死了皮匠
-                var noneWerewolfDead = Room.StateStack.Last().Seats.Values
+                var noneWerewolfDead = Room.StateStack.Last().Seats
                     .Where(seat => seat.No >= 0 && GetPlayRole(seat.Card) == GameRole.Werewolf)
                     .All(seat => !seat.Dead);
                 if (!noneWerewolfDead)
@@ -800,7 +800,7 @@ namespace OneNightWerewolf
                 }
                 else
                 {
-                    var deadCount = Room.StateStack.Last().Seats.Values
+                    var deadCount = Room.StateStack.Last().Seats
                             .Where(seat => seat.Dead).Count();
                     if (deadCount == 0)
                     {
@@ -808,7 +808,7 @@ namespace OneNightWerewolf
                     }
                     else
                     {
-                        var onlyTannerDead = Room.StateStack.Last().Seats.Values
+                        var onlyTannerDead = Room.StateStack.Last().Seats
                                 .Where(seat => seat.Dead)
                                 .All(seat => GetPlayRole(seat.Card) == GameRole.Tanner);
                         if (onlyTannerDead) werewolfWin = false;
@@ -960,7 +960,7 @@ namespace OneNightWerewolf
                     var liveness = GetDeadReasonDesc(reason);
                     var result = $"{liveness}的{roleName},{(win ? "胜利" : "失败")}!";
                     result += "\n";
-                    Room.StateStack.Last().Seats.Values.Where(seat=>seat.No>=0).ToList()
+                    Room.StateStack.Last().Seats.Where(seat=>seat.No>=0).ToList()
                         .ForEach(seat => {
                             var player = GetPlayerBySeatNo(seat.No);
                             var playerRoleName = GetRoleDesc(GetPlayRole(seat.Card));

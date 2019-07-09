@@ -7,10 +7,10 @@ namespace OneNightWerewolf
     {
         public GameState()
         {
-            Seats = new Dictionary<int, GameSeat>();
+            Seats = new List<GameSeat>();
         }
 
-        public Dictionary<int, GameSeat> Seats { get; set; }
+        public List<GameSeat> Seats { get; set; }
 
         public GamePhase Phase { get; set; }
 
