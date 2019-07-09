@@ -913,11 +913,11 @@ namespace OneNightWerewolf
             switch(deadReason)
             {
                 case DeadReason.None:
-                    return "无";
+                    return "幸存";
                 case DeadReason.Hunter:
-                    return "猎人";
+                    return "死于猎人";
                 case DeadReason.Vote:
-                    return "投票";
+                    return "死于投票";
             }
             return "";
         }
@@ -957,7 +957,7 @@ namespace OneNightWerewolf
                         roleName = GetRoleDesc((GameRole)Convert.ToInt32(option.Result[2]));
                     }
                     var reason = (DeadReason)Convert.ToInt32(option.Result[4]);
-                    var liveness = (bool)option.Result[3] ? "死于"+ GetDeadReasonDesc(reason) : "幸存";
+                    var liveness = GetDeadReasonDesc(reason);
                     var result = $"{liveness}的{roleName},{(win ? "胜利" : "失败")}!";
                     result += "\n";
                     Room.StateStack.Last().Seats.Values.Where(seat=>seat.No>=0).ToList()
@@ -967,7 +967,7 @@ namespace OneNightWerewolf
                             var vote = player.HistoryOptions.FirstOrDefault(op => op.Command == GameCommand.Vote);
                             var voteSeatNo = Convert.ToInt32(vote?.Arguments[0]);
                             var voteUserNick = GetPlayerBySeatNo(voteSeatNo).UserNick;
-                            result += $"\n[P{seat.No}]{player.UserNick}是{playerRoleName}，共获{seat.Vote}票，投杀[P{voteSeatNo}]{voteUserNick}，{(seat.Dead ? "死于"+GetDeadReasonDesc(seat.DeadReason) : "幸存")}。";
+                            result += $"\n[P{seat.No}]{player.UserNick}是{GetDeadReasonDesc(seat.DeadReason)}的{playerRoleName}，投杀[P{voteSeatNo}]{voteUserNick}。";
                         });
                     return result;
             }
