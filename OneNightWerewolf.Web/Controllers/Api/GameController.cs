@@ -153,7 +153,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
                 if(player != null)
                 {
                     var kickUser = userProvider.Get(player.UserId);
-                    if(kickUser != null)
+                    if(kickUser != null && ! string.IsNullOrEmpty(kickUser.RoomId))
                     {
                         game.Leave(kickUser);
                     }

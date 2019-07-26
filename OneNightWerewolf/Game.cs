@@ -178,8 +178,9 @@ namespace OneNightWerewolf
                 {
                     user.RoomId = null;
                     Over();
+                    return true;
                 }
-                return true;
+                return false;
             }
         }
 
