@@ -7,9 +7,19 @@
 
 </div>
 @section Scripts{
-    <script type="text/javascript">
-    $.post('/api/user/logout', null, function () {
+<script type="text/javascript">if (window.confirm("确认退出登录？退出登录将会同时退出房间！")) {
+        $.post("/api/game/leave", null)
+            .done(function (data) {
+                if (data.code > 0) {
+                    alert(data.message);
+                } else {
+                    $.post('/api/user/logout', null, function () {
+                        window.location = '/';
+                    });
+                }
+            });
+    } else {
         window.location = '/';
-    });
-    </script> 
+    }
+</script> 
 }
