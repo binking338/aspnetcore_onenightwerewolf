@@ -55,9 +55,23 @@
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu">
+                        <button id="New3" class="dropdown-item btn btn-outline-primary btn-lg" type="button">3人局</button>
                         <button id="New4" class="dropdown-item btn btn-outline-primary btn-lg" type="button">4人局</button>
                         <button id="New5" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局</button>
-                        <button id="New6" class="dropdown-item btn btn-outline-primary btn-lg" type="button">6人局</button>
+                        <button id="New6_zy" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙</button>
+                        <button id="New6_jg" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼</button>
+                        <button id="New6_smz" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+失眠者</button>
+                        <button id="New6_lr" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+猎人</button>
+                        <button id="New6_pj" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+皮匠</button>
+                        <button id="New6_yl" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+幽灵</button>
+                        <button id="New7_zy_jg" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+酒鬼</button>
+                        <button id="New7_zy_smz" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+失眠者</button>
+                        <button id="New7_zy_lr" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+猎人</button>
+                        <button id="New7_jg_smz" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼+失眠者</button>
+                        <button id="New7_jg_lr" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼+猎人</button>
+                        <button id="New7_smz_lr" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+失眠者+猎人</button>
+                        <button id="New7_syr" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+2守夜人</button>
+                        <button id="New7_zy_yl" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+幽灵</button>
                     </div>
                 </div>
             </div>
@@ -493,6 +507,10 @@
 
         $('#Join').click(Join);
         $('#New').click(New);
+        $('#New3').click(function () {
+            $('#Roles').val("0,1,1,4,5,6");
+            New();
+        });
         $('#New4').click(function () {
             $('#Roles').val("0,0,1,1,4,5,6");
             New();
@@ -501,8 +519,60 @@
             $('#Roles').val("0,0,0,1,1,4,5,6");
             New();
         });
-        $('#New6').click(function () {
+        $('#New6_zy').click(function () {
             $('#Roles').val("0,0,0,1,1,2,4,5,6");
+            New();
+        });
+        $('#New6_jg').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,7");
+            New();
+        });
+        $('#New6_smz').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,8");
+            New();
+        });
+        $('#New6_lr').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,9");
+            New();
+        });
+        $('#New6_pj').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,10");
+            New();
+        });
+        $('#New6_yl').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,11");
+            New();
+        });
+        $('#New7_zy_jg').click(function () {
+            $('#Roles').val("0,0,0,1,1,2,4,5,6,7");
+            New();
+        });
+        $('#New7_zy_smz').click(function () {
+            $('#Roles').val("0,0,0,1,1,2,4,5,6,8");
+            New();
+        });
+        $('#New7_zy_lr').click(function () {
+            $('#Roles').val("0,0,0,1,1,2,4,5,6,9");
+            New();
+        });
+        $('#New7_jg_smz').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,7,8");
+            New();
+        });
+        $('#New7_jg_lr').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,7,9");
+            New();
+        });
+        $('#New7_smz_lr').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,8,9");
+            New();
+        });
+        $('#New7_syr').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6,3,3");
+            New();
+        });
+        $('#New7_zy_yl').click(function () {
+            $('#Roles').val("0,0,0,1,1,2,4,5,6,11");
             New();
         });
         $('#Start').click(Start); 33
