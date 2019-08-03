@@ -1,27 +1,73 @@
 ﻿@model OneNightWerewolf.User;
 @{
     ViewData["Title"] = "首页";
+    if (ViewData["room.roles"] == null)
+    {
+        ViewData["room.roles"] = "0,0,0,1,1,4,5,6"; // 经典牌型
+    }
 }
-
-<div class="text-center">
-    <div id="ConfigContainer">
-        <h3><label>房间号：</label><input id="RoomId" type="text" value="@Model.RoomId" /><a id="Join" href="javascript:void(0)">进入</a><a id="Leave" href="javascript:void(0)">离开</a></h3>
-        <h3><label>角色牌：</label><input id="Roles" type="text" value="@ViewData["room.roles"]" /><a id="New" href="javascript:void(0)">创建</a></h3>
+<div class="container">
+    <div class="row">
+        <div class="col text-center">
+            <div class="btn-group  mb-3" role="group" aria-label="Game Menu">
+                <button id="Config" type="button" class="btn btn-primary btn-lg">设置</button>
+                <button id="Start" type="button" class="btn btn-primary btn-lg">开始</button>
+                <button id="History" type="button" class="btn btn-primary btn-lg">历史</button>
+                <button id="MyOptions" type="button" class="btn btn-primary btn-lg">刷新<span id="CountDown" style="display: inline-block; width: 2em"></span></button>
+            </div>
+        </div>
     </div>
-    <h3>
-        <a id="Config" href="javascript:void(0)">设置</a>&nbsp;&nbsp;
-        @*<a id="Leave" href="javascript:void(0)">离开</a>&nbsp;&nbsp;*@
-        <a id="Start" href="javascript:void(0)">开始</a>&nbsp;&nbsp;
-        <a id="History" href="javascript:void(0)">历史</a>&nbsp;&nbsp;
-        <a id="MyOptions" href="javascript:void(0)">刷新</a><span id="CountDown" style="display:inline-block;width:2em"></span>
-    </h3>
 </div>
-<div id="RoleContainer" class="text-center">
+<div id="ConfigContainer" class="container">
+    <div class="row">
+        <div class="col">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">房间号</span>
+                </div>
+                <input id="RoomId" type="text" value="@Model.RoomId" placeholder="房间别进错" class="form-control form-control-lg" aria-label="RoomId" aria-describedby="basic-addon1">
+                <div class="input-group-append">
+                    <button id="Join" class="btn btn-outline-primary btn-lg" type="button">进入</button>
+                    <button id="Leave" class="btn btn-outline-primary btn-lg" type="button">离开</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">角色牌</span>
+                </div>
+                <input id="Roles" type="text" value="@ViewData["room.roles"]" placeholder="角色编号参照简介" class="form-control form-control-lg" aria-label="Roles" aria-describedby="basic-addon1">
+                <div class="input-group-append">
+                    <button id="New" class="btn btn-outline-primary btn-lg" type="button">创建</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div id="PlayerContainer" class="text-center">
+<div class="container">
+    <div class="row">
+        <div class="col-2 pr-0 pl-0 align-middle text-right">
+            <h6>角色:</h6>
+        </div>
+        <div class="col-10" id="RoleContainer">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2 pr-0 pl-0 align-middle  text-right">
+            <h6>玩家:</h6>
+        </div>
+        <div class="col-10" id="PlayerContainer">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center" id="OptionContainer">
+        </div>
+    </div>
 </div>
-<div id="OptionContainer" class="text-center">
-</div>
+
 
 @section Scripts{
 <script type="text/javascript">$(function () {
@@ -81,9 +127,9 @@
                         $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
                         descs.options.forEach(function (desc, i) {
                             var btn = $("<a href='javascript:void(0)' />").text(desc);
-                            if(descs.phrase == '天亮了，请找出狼人'){
+                            if (descs.phrase == '天亮了，请找出狼人') {
                                 btn.click(function () {
-                                    if(window.confirm("确定"+desc+"?")){
+                                    if (window.confirm("确定" + desc + "?")) {
                                         Action(i);
                                     }
                                 });
@@ -127,8 +173,8 @@
                         $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
                         var actionResult = descs.options[0].split("\n\n");
                         $("#OptionContainer").append($("<h3>").html(actionResult[0].replace("=>", "：")));
-                        if(actionResult.length>1)
-                            $("#OptionContainer").append(actionResult[1].replace(/\n/g,"<br/>"));
+                        if (actionResult.length > 1)
+                            $("#OptionContainer").append(actionResult[1].replace(/\n/g, "<br/>"));
 
                     }
                 });
@@ -168,10 +214,10 @@
                 .done(function (data) {
                     if (data.code > 0) {
                         //alert(data.message);
-                        $("#PlayerContainer").html("").append("<br/>").append($("<h3>").html("请先加入房间"));
+                        $("#PlayerContainer").html("").append($("<h6 class='text-danger'>").html("请先加入房间"));
                         RoomButtonConfig(false);
                     } else {
-                        $("#PlayerContainer").html("<h6>玩家：</h6>");
+                        $("#PlayerContainer").html("<h6></h6>");
                         $("#PlayerContainer h6")
                             .append(data.data.map(function (p, i) {
                                 if (i == 0) {
@@ -192,9 +238,9 @@
                 .done(function (data) {
                     if (data.code > 0) {
                         //alert(data.message);
-                        $("#RoleContainer").html("");
+                        $("#RoleContainer").html("<h6>(无)</h6>");
                     } else {
-                        $("#RoleContainer").html("<br/><h6>角色：</h6>");
+                        $("#RoleContainer").html("<h6></h6>");
                         $("#RoleContainer h6").append(data.data.join(",&nbsp;"));
                     }
                 });
@@ -328,15 +374,15 @@
 
     @if (!string.IsNullOrEmpty(Model.RoomId))
     {
-    <script type="text/javascript">$(function () {
-        $('#ConfigContainer').hide();
-        $('#Join').hide();
-    });</script>
+        <script type="text/javascript">$(function () {
+                $('#ConfigContainer').hide();
+                $('#Join').hide();
+            });</script>
     }
     else
     {
-    <script type="text/javascript">$(function () {
-            $('#Leave').hide();
-        });</script>
+        <script type="text/javascript">$(function () {
+                $('#Leave').hide();
+            });</script>
     }
 }

@@ -3,10 +3,26 @@
 }
 <div class="text-center">
     <h1 class="display-4">登录</h1>
-    <h3>
-        <label>昵称：</label><input id="Nick" type="text" /> <a id="Submit" href="javascript:void(0)">加入</a>
-    </h3>
-
+</div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">昵称</span>
+                </div>
+                <input id="Nick" type="text" class="form-control form-control-lg" placeholder="取个嚣张的名字先！" aria-label="Username" aria-describedby="basic-addon1">
+                <div class="input-group-append">
+                    <button id="Submit" class="btn btn-outline-primary btn-lg" type="button">登录</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <img src="/onw.jpeg" class="img-fluid" />
+        </div>
+    </div>
 </div>
 
 @section Scripts{
