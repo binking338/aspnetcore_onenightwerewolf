@@ -240,6 +240,16 @@ namespace OneNightWerewolf.Web.Controllers.Api
         }
 
         [HttpGet]
+        public Response<bool> IsRoomMaster([FromServices] Game game)
+        {
+            User user = GetUser();
+            if (user == null) return Response<bool>.Return(false);
+            if (string.IsNullOrEmpty(user.RoomId)) return Response<bool>.Return(false);
+            game.SetRoomId(user.RoomId);
+            return Response<bool>.Return(game.IsRoomMaster(user.Id));
+        }
+
+        [HttpGet]
         public Response<GameOption[]> MyOptions([FromServices] Game game)
         {
             User user = GetUser();

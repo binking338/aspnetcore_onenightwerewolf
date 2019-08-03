@@ -54,6 +54,7 @@ namespace OneNightWerewolf.Web.Controllers
                 game.SetRoomId(user.RoomId);
                 ViewData["room.id"] = user.RoomId;
                 ViewData["room.roles"] = string.Join(",", game.GetAllCards()?.Select(card => (int)card.Role));
+                ViewData["room.ismaster"] = game.IsRoomMaster(user.Id);
             }
             return View(user);
         }

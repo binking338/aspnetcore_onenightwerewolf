@@ -5,13 +5,14 @@
     {
         ViewData["room.roles"] = "0,0,0,1,1,4,5,6"; // 经典牌型
     }
+    var isRoomMaster = (bool?)ViewData["room.ismaster"] == true;
 }
 <div class="container">
     <div class="row">
         <div class="col text-center">
             <div class="btn-group  mb-3" role="group" aria-label="Game Menu">
                 <button id="Config" type="button" class="btn btn-primary btn-lg">设置</button>
-                <button id="Start" type="button" class="btn btn-primary btn-lg">开始</button>
+                <button id="Start" type="button" class="btn btn-primary btn-lg" @(isRoomMaster ? "" : "disabled") >开始</button>
                 <button id="History" type="button" class="btn btn-primary btn-lg">历史</button>
                 <button id="MyOptions" type="button" class="btn btn-primary btn-lg">刷新<span id="CountDown" style="display: inline-block; width: 2em"></span></button>
             </div>
@@ -108,7 +109,19 @@
             });
         }
 
+        function IsRoomMaster() {
+            $.get("/api/game/isroommaster")
+                .done(function (data) {
+                    if (data.data) {
+                        $("#Start").removeAttr("disabled");
+                    } else {
+                        $("#Start").attr("disabled", "disabled");
+                    }
+                });
+        }
+
         function MyOptions() {
+            IsRoomMaster();
             Roles();
             Players();
             $.get("/api/game/myoptionsdesc", null).done(function (data) {
@@ -238,10 +251,11 @@
                         $("#PlayerContainer h6")
                             .append(data.data.map(function (p, i) {
                                 if (i == 0) {
-                                    return $("<span>").append("[P" + p.seatNo + "]").append(p.userNick);
+                                    var masterbtn = $("<a href='javascript:void(0)' />").append("[P" + p.seatNo + "]");
+                                    return $("<span>").append(masterbtn).append(p.userNick);
                                 } else {
-                                    var kickbtn = $("<a href='javascript:void(0)' />").append("[P" + p.seatNo + "]")
-                                        .click(function () { Kick(p); });
+                                    var kickbtn = $("<a href='javascript:void(0)' />").append("[P" + p.seatNo + "]");
+                                    if (!$("#Start").is('[disabled]')) kickbtn.click(function () { Kick(p); });
                                     return $("<span>").append(",&nbsp;").append(kickbtn).append(p.userNick);
                                 }
                             }));
@@ -298,6 +312,7 @@
                     }
                     RoomButtonConfig(false);
                     MyOptions();
+                    IsRoomMaster();
                 });
         }
 
@@ -331,6 +346,7 @@
                         Config();
                         MyOptions();
                     }
+                    IsRoomMaster();
                 });
         }
 
@@ -367,6 +383,7 @@
                         Config();
                         MyOptions();
                     }
+                    IsRoomMaster();
                 }
             });
 
@@ -405,19 +422,15 @@
 
     @if (!string.IsNullOrEmpty(Model.RoomId))
     {
-        <script type="text/javascript">
-            $(function () {
+        <script type="text/javascript">$(function () {
                 $('#ConfigContainer').hide();
                 $('#Join').hide();
-            });
-        </script>
+            });</script>
     }
     else
     {
-        <script type="text/javascript">
-            $(function () {
+        <script type="text/javascript">$(function () {
                 $('#Leave').hide();
-            });
-        </script>
+            });</script>
     }
 }
