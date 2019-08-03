@@ -76,19 +76,30 @@
             return parseInt(a + Math.random() * Math.abs(b - a));
         }
 
-        function CountDown(t, cb) {
-            if (arguments.callee.handle) {
-                clearTimeout(arguments.callee.handle);
+        function CountDown(t, cb, selector) {
+            selector = selector || "#CountDown";
+            if (arguments.callee[selector]) {
+                clearTimeout(arguments.callee[selector]);
+                arguments.callee[selector] = null;
             }
-            $("#CountDown").text("(" + t + ")");
-            arguments.callee.handle = setTimeout(function () {
+            $(selector).text("(" + t + ")");
+            arguments.callee[selector] = setTimeout(function () {
                 if (t - 1 == 0) {
-                    $("#CountDown").text("");
+                    $("selector").text("");
                     cb();
                 } else {
-                    CountDown(t - 1, cb);
+                    CountDown(t - 1, cb, selector);
                 }
             }, 1000);
+        }
+
+        function CancelCountDown(selector) {
+            selector = selector || "#CountDown";
+            if (arguments.callee[selector]) {
+                clearTimeout(arguments.callee[selector]);
+                arguments.callee[selector] = null;
+            }
+            $(selector).text("");
         }
 
         function GotoNextPhase() {
@@ -100,53 +111,59 @@
         function MyOptions() {
             Roles();
             Players();
-            $.get("/api/game/myoptionsdesc", null)
-                .done(function (data) {
-                    if (data.code > 0) {
-                        if (data.code == 1) {
-                            // 没登录
-                            window.location = window.location;
-                        } else if (data.code == 7) {
-                            // 无房间
-                            RoomButtonConfig(false);
-                            $("#OptionContainer").html("")
-                        }
-                        //alert(data.message);
-                    } else {
-                        if (data.data == null || data.data.options == null || data.data.options.length == 0) {
-                            // 获取上次的信息
-                            MyLastOptionDesc();
-                            return;
-                        }
-                        if (data.data && data.data.options && data.data.options.length == 1) {
-                            // Action(0); // 自动选择
-                            // return;
-                        }
+            $.get("/api/game/myoptionsdesc", null).done(function (data) {
+                if (data.code > 0) {
+                    if (data.code == 1) {
+                        // 没登录
+                        window.location = window.location;
+                    } else if (data.code == 7) {
+                        // 无房间
+                        RoomButtonConfig(false);
+                        $("#OptionContainer").html("")
+                    }
+                    //alert(data.message);
+                } else {
+                    if (data.data == null || data.data.options == null || data.data.options.length == 0) {
+                        // 获取上次的信息
+                        MyLastOptionDesc();
+                        return;
+                    }
+                    if (data.data && data.data.options && data.data.options.length == 1) {
+                        // Action(0); // 自动选择
+                        // return;
+                    }
 
-                        var descs = data.data;
-                        $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
-                        descs.options.forEach(function (desc, i) {
-                            var btn = $("<a href='javascript:void(0)' />").text(desc);
-                            if (descs.phrase == '天亮了，请找出狼人') {
-                                btn.click(function () {
-                                    if (window.confirm("确定" + desc + "?")) {
-                                        Action(i);
-                                    }
-                                });
-                            } else {
-                                btn.click(function () {
+                    var descs = data.data;
+                    $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
+
+                    var isDayPhrase = descs.phrase.match(/天亮/);
+                    var isStartPhrase = descs.phrase.match(/游戏开始/);
+                    var isOverPhrase = descs.phrase.match(/游戏结束/);
+
+                    descs.options.forEach(function (desc, i) {
+                        var btn = $("<a href='javascript:void(0)' />").text(desc);
+                        if (isDayPhrase) {
+                            btn.click(function () {
+                                if (window.confirm("确定" + desc + "?")) {
                                     Action(i);
-                                });
-                            }
-                            $("#OptionContainer").append($("<h3>").append(btn));
-                        });
-                        if (descs.phrase != '游戏开始' && descs.phrase != '游戏结束' && descs.phrase != '天亮了，请找出狼人') {
-                            CountDown(R(10, 15), function () {
-                                Action(R(0, descs.options.length));
+                                }
+                            });
+                        } else {
+                            btn.click(function () {
+                                Action(i);
                             });
                         }
+                        $("#OptionContainer").append($("<h3>").append(btn));
+                    });
+                    if (!isStartPhrase && !isOverPhrase && !isDayPhrase) {
+                        CountDown(R(15, 20), function () {
+                            Action(R(0, descs.options.length));
+                        });
+                    } else {
+                        CancelCountDown();
                     }
-                });
+                }
+            });
         }
 
         function MyLastOptionDesc() {
@@ -371,7 +388,7 @@
 
         $('#Join').click(Join);
         $('#New').click(New);
-        $('#Start').click(Start);
+        $('#Start').click(Start); 33
         $('#Leave').click(Leave);
         $('#MyOptions').click(MyOptions);
         $('#History').click(History);
@@ -388,15 +405,19 @@
 
     @if (!string.IsNullOrEmpty(Model.RoomId))
     {
-        <script type="text/javascript">$(function () {
+        <script type="text/javascript">
+            $(function () {
                 $('#ConfigContainer').hide();
                 $('#Join').hide();
-            });</script>
+            });
+        </script>
     }
     else
     {
-        <script type="text/javascript">$(function () {
+        <script type="text/javascript">
+            $(function () {
                 $('#Leave').hide();
-            });</script>
+            });
+        </script>
     }
 }
