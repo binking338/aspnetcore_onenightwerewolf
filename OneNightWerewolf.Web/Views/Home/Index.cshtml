@@ -167,7 +167,7 @@
                         callee.handler = null;
                         callee.time = null;
                     }
-                    if (data.data < 0) {
+                    if (data.data <= 0) {
                         $(selector).text("--:--");
                     } else {
                         var time = new Date().getTime() - (data.data * 1000)
