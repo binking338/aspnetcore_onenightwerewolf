@@ -211,7 +211,7 @@
                             var game1 = data.data[i];
                             var btn1 = $('<button class="btn btn-primary btn-block" type="submit">加入</button>')
                                 .click(function () {
-                                    $("#RoomId").val(game1.id);
+                                    $("#RoomId").val(game1.id.toString());
                                     Join();
                                 });
                             var cap = game1.cards.length - 3;
@@ -222,7 +222,7 @@
                             info += game1.players.map(function (p) { return p.userNick }).join(',');
 
                             row.append($("<div class='col card text-left'></div>")
-                                .append($("<div class='card-body'><div class='card-title'><h5>" + game1.id + "</h5></div></div>")
+                                .append($("<div class='card-body'><div class='card-title'><h5>" + game1.id.toString() + "</h5></div></div>")
                                     .append("<div>" + info + "</div>")
                                     .append(btn1)));
 
