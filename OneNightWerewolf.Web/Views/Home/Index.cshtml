@@ -52,6 +52,14 @@
                 <input id="Roles" type="text" value="@ViewData["room.roles"]" placeholder="角色编号参照简介" class="form-control form-control-lg" aria-label="Roles" aria-describedby="basic-addon1">
                 <div class="input-group-append">
                     <button id="New" class="btn btn-outline-primary btn-lg" type="button">创建</button>
+                    <button type="button" class="btn btn-primary btn-lg dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <button id="New4" class="dropdown-item btn btn-outline-primary btn-lg" type="button">4人局</button>
+                        <button id="New5" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局</button>
+                        <button id="New6" class="dropdown-item btn btn-outline-primary btn-lg" type="button">6人局</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -479,6 +487,18 @@
 
         $('#Join').click(Join);
         $('#New').click(New);
+        $('#New4').click(function () {
+            $('#Roles').val("0,0,1,1,4,5,6");
+            New();
+        });
+        $('#New5').click(function () {
+            $('#Roles').val("0,0,0,1,1,4,5,6");
+            New();
+        });
+        $('#New6').click(function () {
+            $('#Roles').val("0,0,0,1,1,2,4,5,6");
+            New();
+        });
         $('#Start').click(Start); 33
         $('#Leave').click(Leave);
         $('#MyOptions').click(MyOptions);
