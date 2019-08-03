@@ -7,7 +7,7 @@ namespace OneNightWerewolf.Web.Models
         {
 
         }
-        public string Phrase { get; set; }
+        public string Phase { get; set; }
 
         public string[] Options { get; set; }
     }

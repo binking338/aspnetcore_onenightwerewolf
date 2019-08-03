@@ -12,9 +12,18 @@
         <div class="col text-center">
             <div class="btn-group  mb-3" role="group" aria-label="Game Menu">
                 <button id="Config" type="button" class="btn btn-primary btn-lg">设置</button>
-                <button id="Start" type="button" class="btn btn-primary btn-lg" @(isRoomMaster ? "" : "disabled") >开始</button>
+                <button id="Start" type="button" class="btn btn-primary btn-lg" @(isRoomMaster ? "" : "disabled")>开始</button>
                 <button id="History" type="button" class="btn btn-primary btn-lg">历史</button>
-                <button id="MyOptions" type="button" class="btn btn-primary btn-lg">刷新<span id="CountDown" style="display: inline-block; width: 2em"></span></button>
+                <button id="MyOptions" type="button" class="btn btn-primary btn-lg">刷新&nbsp;<span id="CountDown" style="display: inline-block; width: 1em"></span></button>
+                <button type="button" class="btn btn-primary btn-lg dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu">
+                    <div class="dropdown-item form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="EnableCountDown" value="EnableCountDown" checked="checked">
+                        <label class="form-check-label" for="EnableCountDown">自动刷新</label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -29,7 +38,7 @@
                 <input id="RoomId" type="text" value="@Model.RoomId" placeholder="房间别进错" class="form-control form-control-lg" aria-label="RoomId" aria-describedby="basic-addon1">
                 <div class="input-group-append">
                     <button id="Join" class="btn btn-outline-primary btn-lg" type="button">进入</button>
-                    <button id="Leave" class="btn btn-outline-primary btn-lg" type="button">离开</button>
+                    <button id="Leave" class="btn btn-outline-danger btn-lg" type="button">离开</button>
                 </div>
             </div>
         </div>
@@ -53,17 +62,27 @@
         <div class="col-2 pr-0 pl-0 align-middle text-right">
             <h6>角色:</h6>
         </div>
-        <div class="col-10" id="RoleContainer">
+        <div class="col-10">
+            <h6 id="RoleContainer"></h6>
         </div>
     </div>
     <div class="row">
         <div class="col-2 pr-0 pl-0 align-middle  text-right">
             <h6>玩家:</h6>
         </div>
-        <div class="col-10" id="PlayerContainer">
+        <div class="col-10">
+            <h6 id="PlayerContainer"></h6>
         </div>
     </div>
     <div class="row">
+        <div class="col-2 pr-0 pl-0 align-middle  text-right">
+            <h6>时间:</h6>
+        </div>
+        <div class="col-10">
+            <h6 id="TimeContainer"></h6>
+        </div>
+    </div>
+    <div class="row pt-2">
         <div class="col text-center" id="OptionContainer">
         </div>
     </div>
@@ -83,12 +102,13 @@
                 clearTimeout(arguments.callee[selector]);
                 arguments.callee[selector] = null;
             }
-            $(selector).text("(" + t + ")");
+            $(selector).text(t);
             arguments.callee[selector] = setTimeout(function () {
                 if (t - 1 == 0) {
-                    $("selector").text("");
+                    $("selector").text("0");
                     cb();
                 } else {
+                    arguments.callee[selector] = null;
                     CountDown(t - 1, cb, selector);
                 }
             }, 1000);
@@ -103,10 +123,18 @@
             $(selector).text("");
         }
 
-        function GotoNextPhase() {
-            CountDown(3, function () {
-                MyOptions();
-            });
+        function AutoNextPhase() {
+            if (IsCountDownEnabled()) {
+                CountDown(3, function () {
+                    MyOptions();
+                });
+            } else {
+                CancelCountDown();
+            }
+        }
+
+        function IsCountDownEnabled() {
+            return $("#EnableCountDown").is(":checked")
         }
 
         function IsRoomMaster() {
@@ -114,8 +142,40 @@
                 .done(function (data) {
                     if (data.data) {
                         $("#Start").removeAttr("disabled");
+                        $("#Start").show();
+                        IsRoomMaster.cache = true;
                     } else {
                         $("#Start").attr("disabled", "disabled");
+                        $("#Start").hide();
+                        IsRoomMaster.cache = false;
+                    }
+                });
+        }
+
+        function IsRoomMasterByCache() {
+            return IsRoomMaster.cache;
+        }
+
+        function DawnClock() {
+            var callee = arguments.callee;
+            var selector = arguments.callee.container = "#TimeContainer";
+            $.get("/api/game/getdawntime")
+                .done(function (data) {
+                    if (arguments.callee.handler) {
+                        clearTimeout(arguments.callee.handler);
+                        arguments.callee.handler = null;
+                        callee.time = null;
+                    }
+                    if (data.data < 0) {
+                        $(selector).text("--:--");
+                    } else {
+                        var time = new Date().getTime() - (data.data * 1000)
+                        callee.time = time;
+                        (function () {
+                            var duration = parseInt((new Date().getTime() - DawnClock.time) / 1000);
+                            $(selector).text(parseInt(duration / 60) + ":" + (duration % 60 < 10 ? "0" + duration % 60 : duration % 60));
+                            arguments.callee.handler = setTimeout(arguments.callee, 1000)
+                        })();
                     }
                 });
         }
@@ -124,6 +184,7 @@
             IsRoomMaster();
             Roles();
             Players();
+            DawnClock();
             $.get("/api/game/myoptionsdesc", null).done(function (data) {
                 if (data.code > 0) {
                     if (data.code == 1) {
@@ -147,15 +208,19 @@
                     }
 
                     var descs = data.data;
-                    $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
 
-                    var isDayPhrase = descs.phrase.match(/天亮/);
-                    var isStartPhrase = descs.phrase.match(/游戏开始/);
-                    var isOverPhrase = descs.phrase.match(/游戏结束/);
+                    var isDayPhase = descs.phase.match(/天亮/);
+                    var isStartPhase = descs.phase.match(/游戏开始/);
+                    var isOverPhase = descs.phase.match(/游戏结束/);
+
+                    $("#OptionContainer")
+                        .html("")
+                        .append("<h3>" + descs.phase + "</h3>");
+
 
                     descs.options.forEach(function (desc, i) {
                         var btn = $("<a href='javascript:void(0)' />").text(desc);
-                        if (isDayPhrase) {
+                        if (isDayPhase) {
                             btn.click(function () {
                                 if (window.confirm("确定" + desc + "?")) {
                                     Action(i);
@@ -168,7 +233,7 @@
                         }
                         $("#OptionContainer").append($("<h3>").append(btn));
                     });
-                    if (!isStartPhrase && !isOverPhrase && !isDayPhrase) {
+                    if (!isStartPhase && !isOverPhase && !isDayPhase && IsCountDownEnabled()) {
                         CountDown(R(15, 20), function () {
                             Action(R(0, descs.options.length));
                         });
@@ -193,14 +258,14 @@
                         }
                         //alert(data.message);
                     } else {
-                        GotoNextPhase();
+                        AutoNextPhase();
                         if (data.data == null || data.data.options == null || data.data.options.length == 0) {
                             $("#OptionContainer").html("")
                             return;
                         }
 
                         var descs = data.data;
-                        $("#OptionContainer").html("<br/>").append("<h3>" + descs.phrase + "</h3>");
+                        $("#OptionContainer").html("<br/>").append("<h3>" + descs.phase + "</h3>");
                         var actionResult = descs.options[0].split("\n\n");
                         $("#OptionContainer").append($("<h3>").html(actionResult[0].replace("=>", "：")));
                         if (actionResult.length > 1)
@@ -247,15 +312,15 @@
                         $("#PlayerContainer").html("").append($("<h6 class='text-danger'>").html("请先加入房间"));
                         RoomButtonConfig(false);
                     } else {
-                        $("#PlayerContainer").html("<h6></h6>");
-                        $("#PlayerContainer h6")
+                        $("#PlayerContainer").html("");
+                        $("#PlayerContainer")
                             .append(data.data.map(function (p, i) {
                                 if (i == 0) {
                                     var masterbtn = $("<a href='javascript:void(0)' />").append("[P" + p.seatNo + "]");
                                     return $("<span>").append(masterbtn).append(p.userNick);
                                 } else {
                                     var kickbtn = $("<a href='javascript:void(0)' />").append("[P" + p.seatNo + "]");
-                                    if (!$("#Start").is('[disabled]')) kickbtn.click(function () { Kick(p); });
+                                    if (IsRoomMasterByCache()) kickbtn.click(function () { Kick(p); });
                                     return $("<span>").append(",&nbsp;").append(kickbtn).append(p.userNick);
                                 }
                             }));
@@ -269,7 +334,7 @@
                 .done(function (data) {
                     if (data.code > 0) {
                         //alert(data.message);
-                        $("#RoleContainer").html("<h6>(无)</h6>");
+                        $("#RoleContainer").html("-");
                     } else {
                         var roles = data.data.reduce(function (r, d, i, arr) {
                             if (i == 0 || arr[i - 1] != d) {
@@ -285,8 +350,8 @@
                             .map(function (d, i) {
                                 return d.num == 1 ? d.role : (d.role + "X" + d.num);
                             });
-                        $("#RoleContainer").html("<h6></h6>");
-                        $("#RoleContainer h6").append(roles.join(",&nbsp;"));
+                        $("#RoleContainer").html("");
+                        $("#RoleContainer").append(roles.join(",&nbsp;"));
                     }
                 });
         }
@@ -298,13 +363,16 @@
                         alert(data.message);
                     } else {
                         //$("#OptionContainer").html("").append($("<h3>").html("游戏已开始，请刷新"));
-                        //GotoNextPhase();
+                        //AutoNextPhase();
                         MyOptions();
                     }
                 });
         }
 
         function Leave() {
+            if (IsRoomMasterByCache() && !window.confirm("你是房主，确定离开房间么？")) {
+                return;
+            }
             $.post("/api/game/leave", null)
                 .done(function (data) {
                     if (data.code > 0) {
@@ -408,6 +476,13 @@
         $('#Start').click(Start); 33
         $('#Leave').click(Leave);
         $('#MyOptions').click(MyOptions);
+        $('#EnableCountDown').change(function () {
+            if (IsCountDownEnabled()) {
+                MyOptions();
+            } else {
+                CancelCountDown();
+            }
+        });
         $('#History').click(History);
         $('#Config').click(Config);
         $(document).keydown(function (event) {

@@ -215,6 +215,7 @@ namespace OneNightWerewolf
 
             GameState gameState = new GameState();
             gameState.Phase = GamePhase.Start;
+            gameState.StartTime = new DateTime();
             var cards = new List<GameCard>(Room.Cards);
             for (var i = -CENTER_CARD_NUM; cards.Count > 0; i++)
             {
@@ -680,10 +681,33 @@ namespace OneNightWerewolf
                 {
                     var clone = CloneGameState(Room.StateStack.Last());
                     clone.Phase = GetNextPhase();
+                    if(clone.Phase == GamePhase.Day)
+                    {
+                        clone.DawnTime = DateTime.Now;
+                    }
+                    if(clone.Phase == GamePhase.Over)
+                    {
+                        clone.OverTime = DateTime.Now;
+                    }
                     Room.StateStack.Add(clone);
                 }
             }
             return option;
+        }
+
+        public DateTime? GetStartTime()
+        {
+            return Room.StateStack?.LastOrDefault()?.StartTime;
+        }
+
+        public DateTime? GetOverTime()
+        {
+            return Room.StateStack?.LastOrDefault()?.OverTime;
+        }
+
+        public DateTime? GetDawnTime()
+        {
+            return Room.StateStack?.LastOrDefault()?.DawnTime;
         }
 
         protected GameState CloneGameState(GameState state)
@@ -694,6 +718,9 @@ namespace OneNightWerewolf
             {
                 clone.Seats.Add(new GameSeat() { No = seat.No, Card = seat.Card, Vote = seat.Vote, Dead = seat.Dead, Win = seat.Win, DeadReason = seat.DeadReason });
             }
+            clone.StartTime = state.StartTime;
+            clone.OverTime = state.OverTime;
+            clone.DawnTime = state.DawnTime;
             return clone;
         }
 

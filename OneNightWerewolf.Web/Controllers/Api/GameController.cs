@@ -281,9 +281,24 @@ namespace OneNightWerewolf.Web.Controllers.Api
             option = game.Action(player.SeatNo, option);
             if (option == null) return Response<OptionDescModel>.Return(null);
             OptionDescModel result = new OptionDescModel();
-            result.Phrase = game.GetPhaseDesc(option.Phase);
+            result.Phase = game.GetPhaseDesc(option.Phase);
             result.Options = new string[] { $"{game.GetOptionDesc(option)}{(option.Result == null ? "" : "=>" + game.GetOptionResultDesc(option))}" };
             return Response<OptionDescModel>.Return(result);
+        }
+
+        [HttpGet]
+        public Response<int> GetDawnTime([FromServices] Game game)
+        {
+            User user = GetUser();
+            if (user == null)
+                return Response<int>.Error(1, "未登录用户");
+            if (string.IsNullOrEmpty(user.RoomId))
+                return Response<int>.Error(7, $"不在任何房间中");
+            game.SetRoomId(user.RoomId);
+            DateTime? dawnTime = game.GetDawnTime();
+            if (dawnTime == null) return Response<int>.Return(-1);
+            var duration = (int)(DateTime.Now - dawnTime.Value).TotalSeconds;
+            return Response<int>.Return(duration);
         }
 
         [HttpGet]
@@ -301,7 +316,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             var options = game.GetOptions(player.SeatNo);
             if (options == null || options.Count == 0) return Response<OptionDescModel>.Return(null);
             OptionDescModel result = new OptionDescModel();
-            result.Phrase = game.GetPhaseDesc(options.First().Phase);
+            result.Phase = game.GetPhaseDesc(options.First().Phase);
             result.Options = options.Select(option => $"{game.GetOptionDesc(option)}{(option.Result == null ? "" : "=>" + game.GetOptionResultDesc(option))}").ToArray();
             return Response<OptionDescModel>.Return(result);
         }
@@ -321,7 +336,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             var option = player.HistoryOptions.LastOrDefault();
             if (option == null) return Response<OptionDescModel>.Return(null);
             OptionDescModel result = new OptionDescModel();
-            result.Phrase = game.GetPhaseDesc(option.Phase);
+            result.Phase = game.GetPhaseDesc(option.Phase);
             result.Options = new string[] { $"{game.GetOptionDesc(option)}{(option.Result == null ? "" : "=>" + game.GetOptionResultDesc(option))}" };
             return Response<OptionDescModel>.Return(result);
         }

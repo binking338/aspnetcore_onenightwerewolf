@@ -14,5 +14,11 @@ namespace OneNightWerewolf
 
         public GamePhase Phase { get; set; }
 
+        public DateTime? StartTime { get; set; }
+
+        public DateTime? OverTime { get; set; }
+
+        public DateTime? DawnTime { get; set; }
+
     }
 }
