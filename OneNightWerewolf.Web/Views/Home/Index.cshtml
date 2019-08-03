@@ -240,8 +240,22 @@
                         //alert(data.message);
                         $("#RoleContainer").html("<h6>(无)</h6>");
                     } else {
+                        var roles = data.data.reduce(function (r, d, i, arr) {
+                            if (i == 0 || arr[i - 1] != d) {
+                                r.push({
+                                    "role": d,
+                                    "num": 1
+                                });
+                            } else {
+                                r[r.length - 1].num++;
+                            }
+                            return r;
+                        }, [])
+                            .map(function (d, i) {
+                                return d.num == 1 ? d.role : (d.role + "X" + d.num);
+                            });
                         $("#RoleContainer").html("<h6></h6>");
-                        $("#RoleContainer h6").append(data.data.join(",&nbsp;"));
+                        $("#RoleContainer h6").append(roles.join(",&nbsp;"));
                     }
                 });
         }
