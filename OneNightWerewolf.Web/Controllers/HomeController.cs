@@ -50,11 +50,11 @@ namespace OneNightWerewolf.Web.Controllers
         public IActionResult Index([FromServices] UserProvider userProvider, [FromServices] Game game)
         {
             var user = GetUser();
+            ViewData["user.nick"] = user.Nick;
             if (user != null && !string.IsNullOrEmpty(user.RoomId)  && game.RoomProvider.Exist(user.RoomId)) {
                 game.SetRoomId(user.RoomId);
                 ViewData["room.id"] = user.RoomId;
                 ViewData["room.roles"] = string.Join(",", game.GetAllCards()?.Select(card => (int)card.Role));
-                ViewData["room.ismaster"] = game.IsRoomMaster(user.Id);
             }
             return View(user);
         }

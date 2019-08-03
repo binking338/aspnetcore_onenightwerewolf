@@ -5,14 +5,13 @@
     {
         ViewData["room.roles"] = "0,0,0,1,1,4,5,6"; // 经典牌型
     }
-    var isRoomMaster = (bool?)ViewData["room.ismaster"] == true;
 }
 <div class="container">
     <div class="row">
         <div class="col text-center">
             <div class="btn-group  mb-3" role="group" aria-label="Game Menu">
                 <button id="Config" type="button" class="btn btn-primary btn-lg">设置</button>
-                <button id="Start" type="button" class="btn btn-primary btn-lg" @(isRoomMaster ? "" : "disabled")>开始</button>
+                <button id="Start" type="button" class="btn btn-primary btn-lg" disabled>开始</button>
                 <button id="History" type="button" class="btn btn-primary btn-lg">历史</button>
                 <button id="MyOptions" type="button" class="btn btn-primary btn-lg">刷新&nbsp;<span id="CountDown" style="display: inline-block; width: 1em"></span></button>
                 <button type="button" class="btn btn-primary btn-lg dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -75,7 +74,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-2 pr-0 pl-0 align-middle  text-right">
+        <div class="col-2 pr-0 pl-0 align-middle text-right">
             <h6>玩家:</h6>
         </div>
         <div class="col-10">
@@ -83,10 +82,16 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-2 pr-0 pl-0 align-middle  text-right">
+        <div class="col-2 pr-0 pl-0 align-middle text-right">
+            <h6>用户:</h6>
+        </div>
+        <div class="col-3">
+            <h6 id="UserContainer">@ViewData["user.nick"]</h6>
+        </div>
+        <div class="col-2 pr-0 pl-0 align-middle text-right">
             <h6>时间:</h6>
         </div>
-        <div class="col-10">
+        <div class="col-5">
             <h6 id="TimeContainer"></h6>
         </div>
     </div>
