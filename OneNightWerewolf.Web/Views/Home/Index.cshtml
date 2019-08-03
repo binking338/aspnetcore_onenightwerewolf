@@ -64,7 +64,7 @@
         </div>
     </div>
 </div>
-<div class="container">
+<div id="GameDashboard" class="container">
     <div class="row">
         <div class="col-2 pr-0 pl-0 align-middle text-right">
             <h6>角色:</h6>
@@ -353,7 +353,7 @@
                 .done(function (data) {
                     if (data.code > 0) {
                         //alert(data.message);
-                        $("#RoleContainer").html("-");
+                        $("#RoleContainer").html($("<h6 class='text-danger'>").html("请先加入房间"));
                     } else {
                         var roles = data.data.reduce(function (r, d, i, arr) {
                             if (i == 0 || arr[i - 1] != d) {
@@ -478,6 +478,7 @@
 
         function Config() {
             $("#ConfigContainer").slideToggle();
+            $("#GameDashboard").slideToggle();
         }
 
         function RoomButtonConfig(isEnter) {
@@ -536,6 +537,7 @@
     else
     {
         <script type="text/javascript">$(function () {
+                $("#GameDashboard").hide();
                 $('#Leave').hide();
             });</script>
     }
