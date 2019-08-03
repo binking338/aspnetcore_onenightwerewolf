@@ -25,6 +25,14 @@ namespace OneNightWerewolf
             return room;
         }
 
+        public List<GameRoom> List()
+        {
+            return gameRoomStorage.Values
+                .OrderByDescending(room => room.StateStack.Count > 0 ? room.StateStack.LastOrDefault().StartTime?.Ticks ?? 0 : 0)
+                .ThenBy(room=>room.Id)
+                .ToList();
+        }
+
         public GameRoom New(string roomId, GameRole[] roles)
         {
             if (Exist(roomId)) return null;
@@ -38,7 +46,5 @@ namespace OneNightWerewolf
             gameRoomStorage[roomId] = room;
             return room;
         }
-
-
     }
 }

@@ -85,6 +85,15 @@ namespace OneNightWerewolf.Web.Controllers.Api
             return Response<bool>.Return(true);
         }
 
+        [HttpGet]
+        public Response<List<GameRoom>> RoomList([FromServices] GameRoomProvider gameRoomProvider)
+        {
+            User user = GetUser();
+            if (user == null)
+                return Response<List<GameRoom>>.Error(1, "未登录用户");
+            return Response<List<GameRoom>>.Return(gameRoomProvider.List());
+        }
+
         [HttpPost]
         public Response<bool> Join(string roomId, [FromServices] Game game)
         {

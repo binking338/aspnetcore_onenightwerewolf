@@ -77,6 +77,23 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col">
+            <button id="RefreshRommList" type="button" class="btn btn-primary btn-lg btn-block mb-2">刷新房间</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div id="RoomListContainer" class="container">
+                <div class="row">
+                    <div class="col-6">
+                    </div>
+                    <div class="col-6">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div id="GameDashboard" class="container">
     <div class="row">
@@ -182,6 +199,37 @@
 
         function IsRoomMasterByCache() {
             return IsRoomMaster.cache;
+        }
+
+        function GetRoomList() {
+            $.get("api/game/roomlist")
+                .done(function (data) {
+                    if (data.code == 0) {
+                        $("#RoomListContainer").html("");
+                        for (var i = 0; i < data.data.length; i++) {
+                            var row = $("<div class='row'></div>");
+                            var game1 = data.data[i];
+                            var btn1 = $('<button class="btn btn-primary btn-block" type="submit">加入</button>')
+                                .click(function () {
+                                    $("#RoomId").val(game1.id);
+                                    Join();
+                                });
+                            var cap = game1.cards.length - 3;
+                            var need = (cap - game1.players.length);
+                            var info = cap + "人房,";
+                            info += need > 0 ? ("缺" + need + "人") : "满员";
+                            info += ": ";
+                            info += game1.players.map(function (p) { return p.userNick }).join(',');
+
+                            row.append($("<div class='col card text-left'></div>")
+                                .append($("<div class='card-body'><div class='card-title'><h5>" + game1.id + "</h5></div></div>")
+                                    .append("<div>" + info + "</div>")
+                                    .append(btn1)));
+
+                            $("#RoomListContainer").append(row);
+                        }
+                    }
+                });
         }
 
         function DawnClock() {
@@ -430,9 +478,8 @@
             }
         }
 
-        function Join() {
-            var roomId = $("#RoomId").val();
-            var roles = $("#Roles").val();
+        function Join(roomId) {
+            roomId = roomId || $("#RoomId").val();
             if (!roomId) {
                 $("#RoomId").focus();
                 return;
@@ -440,7 +487,6 @@
             $.post("/api/game/join?roomId=" + encodeURIComponent(roomId), null)
                 .done(function (data) {
                     if (data.code > 0) {
-                        $("#Roles").focus();
                         alert(data.message);
                     } else {
                         RoomButtonConfig(true);
@@ -451,9 +497,9 @@
                 });
         }
 
-        function New() {
-            var roomId = $("#RoomId").val();
-            var roles = $("#Roles").val();
+        function New(roomId, roles) {
+            roomId = roomId || $("#RoomId").val();
+            roles = roles || $("#Roles").val();
             if (!roomId) {
                 $("#RoomId").focus();
                 return;
@@ -493,6 +539,7 @@
         function Config() {
             $("#ConfigContainer").slideToggle();
             $("#GameDashboard").slideToggle();
+            GetRoomList();
         }
 
         function RoomButtonConfig(isEnter) {
@@ -504,6 +551,8 @@
                 $('#Leave').hide();
             }
         }
+
+        $("#RefreshRommList").click(GetRoomList);
 
         $('#Join').click(Join);
         $('#New').click(New);
