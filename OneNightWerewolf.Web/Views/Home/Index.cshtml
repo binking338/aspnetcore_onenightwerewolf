@@ -97,18 +97,19 @@
         }
 
         function CountDown(t, cb, selector) {
+            var callee = arguments.callee;
             selector = selector || "#CountDown";
-            if (arguments.callee[selector]) {
+            if (callee[selector]) {
                 clearTimeout(arguments.callee[selector]);
-                arguments.callee[selector] = null;
+                callee[selector] = null;
             }
             $(selector).text(t);
-            arguments.callee[selector] = setTimeout(function () {
+            callee[selector] = setTimeout(function () {
+                callee[selector] = null;
                 if (t - 1 == 0) {
                     $("selector").text("0");
                     cb();
                 } else {
-                    arguments.callee[selector] = null;
                     CountDown(t - 1, cb, selector);
                 }
             }, 1000);
@@ -161,9 +162,9 @@
             var selector = arguments.callee.container = "#TimeContainer";
             $.get("/api/game/getdawntime")
                 .done(function (data) {
-                    if (arguments.callee.handler) {
-                        clearTimeout(arguments.callee.handler);
-                        arguments.callee.handler = null;
+                    if (callee.handler) {
+                        clearTimeout(callee.handler);
+                        callee.handler = null;
                         callee.time = null;
                     }
                     if (data.data < 0) {
@@ -172,9 +173,14 @@
                         var time = new Date().getTime() - (data.data * 1000)
                         callee.time = time;
                         (function () {
+                            callee.handler = null;
                             var duration = parseInt((new Date().getTime() - DawnClock.time) / 1000);
                             $(selector).text(parseInt(duration / 60) + ":" + (duration % 60 < 10 ? "0" + duration % 60 : duration % 60));
-                            arguments.callee.handler = setTimeout(arguments.callee, 1000)
+
+                            if (callee.handler) {
+                                clearTimeout(callee.handler);
+                            }
+                            callee.handler = setTimeout(arguments.callee, 1000)
                         })();
                     }
                 });
