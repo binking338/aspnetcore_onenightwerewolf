@@ -183,7 +183,7 @@
         }
 
         function IsRoomMaster() {
-            $.get("/api/game/isroommaster")
+            return $.get("/api/game/isroommaster")
                 .done(function (data) {
                     if (data.data) {
                         $("#Start").removeAttr("disabled");
@@ -202,7 +202,7 @@
         }
 
         function GetRoomList() {
-            $.get("api/game/roomlist")
+            return $.get("api/game/roomlist")
                 .done(function (data) {
                     if (data.code == 0) {
                         $("#RoomListContainer").html("");
@@ -210,9 +210,10 @@
                             var row = $("<div class='row'></div>");
                             var game1 = data.data[i];
                             var btn1 = $('<button class="btn btn-primary btn-block" type="submit">加入</button>')
+                                .prop("id", game1.id)
                                 .click(function () {
-                                    $("#RoomId").val(game1.id.toString());
-                                    Join();
+                                    $("#RoomId").val($(this).prop("id"));
+                                    Leave().then(Join);
                                 });
                             var cap = game1.cards.length - 3;
                             var need = (cap - game1.players.length);
@@ -222,7 +223,7 @@
                             info += game1.players.map(function (p) { return p.userNick }).join(',');
 
                             row.append($("<div class='col card text-left'></div>")
-                                .append($("<div class='card-body'><div class='card-title'><h5>" + game1.id.toString() + "</h5></div></div>")
+                                .append($("<div class='card-body'><div class='card-title'><h5>" + game1.id + "</h5></div></div>")
                                     .append("<div>" + info + "</div>")
                                     .append(btn1)));
 
@@ -266,7 +267,7 @@
             Roles();
             Players();
             DawnClock();
-            $.get("/api/game/myoptionsdesc", null).done(function (data) {
+            return $.get("/api/game/myoptionsdesc", null).done(function (data) {
                 if (data.code > 0) {
                     if (data.code == 1) {
                         // 没登录
@@ -326,7 +327,7 @@
         }
 
         function MyLastOptionDesc() {
-            $.get("/api/game/mylastoptiondesc", null)
+            return $.get("/api/game/mylastoptiondesc", null)
                 .done(function (data) {
                     if (data.code > 0) {
                         if (data.code == 1) {
@@ -357,7 +358,7 @@
         }
 
         function Action(option) {
-            $.post("/api/game/action?no=" + option, null)
+            return $.post("/api/game/action?no=" + option, null)
                 .done(function (data) {
                     if (data.code > 0) {
                         if (data.code == 1) {
@@ -376,7 +377,7 @@
         }
 
         function History() {
-            $.get("/api/game/myinfo")
+            return $.get("/api/game/myinfo")
                 .done(function (data) {
                     if (data.code > 0) {
                     } else {
@@ -386,7 +387,7 @@
         }
 
         function Players() {
-            $.get("/api/game/players")
+            return $.get("/api/game/players")
                 .done(function (data) {
                     if (data.code > 0) {
                         //alert(data.message);
@@ -438,7 +439,7 @@
         }
 
         function Start() {
-            $.post("/api/game/start", null)
+            return $.post("/api/game/start", null)
                 .done(function (data) {
                     if (data.code > 0) {
                         alert(data.message);
@@ -454,7 +455,7 @@
             if (IsRoomMasterByCache() && !window.confirm("你是房主，确定离开房间么？")) {
                 return;
             }
-            $.post("/api/game/leave", null)
+            return $.post("/api/game/leave", null)
                 .done(function (data) {
                     if (data.code > 0) {
                         alert(data.message);
@@ -467,7 +468,7 @@
 
         function Kick(player) {
             if (window.confirm("确认踢出玩家：" + player.userNick)) {
-                $.post("/api/game/kick?seatNo=" + player.seatNo, null)
+                return $.post("/api/game/kick?seatNo=" + player.seatNo, null)
                     .done(function (data) {
                         if (data.code > 0) {
                             alert(data.message);
@@ -478,13 +479,13 @@
             }
         }
 
-        function Join(roomId) {
-            roomId = roomId || $("#RoomId").val();
+        function Join() {
+            var roomId = $("#RoomId").val();
             if (!roomId) {
                 $("#RoomId").focus();
                 return;
             }
-            $.post("/api/game/join?roomId=" + encodeURIComponent(roomId), null)
+            return $.post("/api/game/join?roomId=" + encodeURIComponent(roomId), null)
                 .done(function (data) {
                     if (data.code > 0) {
                         alert(data.message);
@@ -497,9 +498,9 @@
                 });
         }
 
-        function New(roomId, roles) {
-            roomId = roomId || $("#RoomId").val();
-            roles = roles || $("#Roles").val();
+        function New() {
+            var roomId = $("#RoomId").val();
+            var roles = $("#Roles").val();
             if (!roomId) {
                 $("#RoomId").focus();
                 return;
@@ -515,7 +516,7 @@
                 $("#Roles").focus();
                 return;
             }
-            $.ajax({
+            return $.ajax({
                 type: 'POST',
                 url: "/api/game/new?roomId=" + encodeURIComponent(roomId),
                 contentType: "application/json; charset=utf-8",
@@ -539,7 +540,6 @@
         function Config() {
             $("#ConfigContainer").slideToggle();
             $("#GameDashboard").slideToggle();
-            GetRoomList();
         }
 
         function RoomButtonConfig(isEnter) {
