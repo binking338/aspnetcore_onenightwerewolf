@@ -222,7 +222,7 @@
                             info += ": ";
                             info += game1.players.map(function (p) { return p.userNick }).join(',');
 
-                            row.append($("<div class='col card text-left'></div>")
+                            row.append($("<div class='col card text-left pl-0 pr-0 mb-2'></div>")
                                 .append($("<div class='card-body'><div class='card-title'><h5>" + game1.id + "</h5></div></div>")
                                     .append("<div>" + info + "</div>")
                                     .append(btn1)));
@@ -553,6 +553,7 @@
         }
 
         $("#RefreshRommList").click(GetRoomList);
+        GetRoomList();
 
         $('#Join').click(Join);
         $('#New').click(New);
