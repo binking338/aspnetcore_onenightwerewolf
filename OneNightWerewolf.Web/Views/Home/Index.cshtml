@@ -458,7 +458,7 @@
             return $.post("/api/game/leave", null)
                 .done(function (data) {
                     if (data.code > 0) {
-                        alert(data.message);
+                        //alert(data.message);
                     }
                     RoomButtonConfig(false);
                     MyOptions();
