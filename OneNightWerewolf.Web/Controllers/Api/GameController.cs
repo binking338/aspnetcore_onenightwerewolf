@@ -48,6 +48,35 @@ namespace OneNightWerewolf.Web.Controllers.Api
             return user;
         }
 
+
+        [HttpPost]
+        public Response<bool> Destroy(string roomId, [FromServices] Game game)
+        {
+            if (!game.RoomProvider.Exist(roomId))
+            {
+                return Response<bool>.Return(false);
+            }
+
+            game.SetRoomId(roomId);
+            var players = game.GetPlayers();
+            foreach (var player in players)
+            {
+                if (player != null)
+                {
+                    var kickUser = userProvider.Get(player.UserId);
+                    if (kickUser != null && !string.IsNullOrEmpty(kickUser.RoomId))
+                    {
+                        game.Leave(kickUser);
+                    }
+                    else
+                    {
+                        game.Kick(player.SeatNo);
+                    }
+                }
+            }
+            return Response<bool>.Return(game.RoomProvider.Remove(roomId));
+        }
+
         [HttpPost]
         public Response<bool> New(string roomId, [FromBody]GameRole[] roles, [FromServices] Game game)
         {
@@ -56,7 +85,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             {
                 return Response<bool>.Error(1, "未登录用户");
             }
-            if (!string.IsNullOrEmpty(user.RoomId))
+            if (!string.IsNullOrEmpty(user.RoomId) && roomId != user.RoomId)
             {
                 return Response<bool>.Error(5, $"当前在房间[{user.RoomId}]中");
             }

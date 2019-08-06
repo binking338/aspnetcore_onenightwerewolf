@@ -46,5 +46,11 @@ namespace OneNightWerewolf
             gameRoomStorage[roomId] = room;
             return room;
         }
+
+        public bool Remove(string roomId)
+        {
+            if (!Exist(roomId)) return false;
+            return gameRoomStorage.Remove(roomId);
+        }
     }
 }

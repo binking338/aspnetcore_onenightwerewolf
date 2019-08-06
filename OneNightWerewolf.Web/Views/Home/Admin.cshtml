@@ -56,6 +56,13 @@
                 });
         }
 
+        function Destroy(roomId) {
+            return $.post("/api/game/destroy?roomId=" + encodeURIComponent(roomId), null)
+                .done(function (data) {
+                    GetRoomList();
+                });
+        }
+
         function GetRoomList() {
             return $.get("/api/game/roomlist")
                 .done(function (data) {
@@ -64,10 +71,15 @@
                         for (var i = 0; i < data.data.length; i++) {
                             var row = $("<div class='row'></div>");
                             var game1 = data.data[i];
-                            var btn1 = $('<button class="btn btn-outline-primary btn-block mt-2" type="submit">清退</button>')
+                            var btn1 = $('<button class="btn btn-outline-primary btn-block mt-2 w-50 float-left" type="submit">清退</button>')
                                 .prop("id", game1.id)
                                 .click(function () {
                                     Clean(game1.id);
+                                });
+                            var btn2 = $('<button class="btn btn-outline-primary btn-block mt-2 w-50 float-right" type="submit">解散</button>')
+                                .prop("id", game1.id)
+                                .click(function () {
+                                    Destroy(game1.id);
                                 });
                             var cap = game1.cards.length - 3;
                             var need = (cap - game1.players.length);
@@ -82,7 +94,8 @@
                                 .append($("<div class='card-body'><div class='card-title clearfix'><h5 class='text-primary float-left'>" + game1.id + "</h5><div class='float-right'>" + info + "</div></div></div>")
                                     .append("<div>" + "<span class='font-weight-bold text-primary'>角色: </span>" + roles + "</div>")
                                     .append("<div>" + "<span class='font-weight-bold text-primary'>玩家: </span>" + players + "</div>")
-                                    .append(btn1)));
+                                    .append(btn1)
+                                    .append(btn2)));
 
                             $("#RoomListContainer").append(row);
                         }
