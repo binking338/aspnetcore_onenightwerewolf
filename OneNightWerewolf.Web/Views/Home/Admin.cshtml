@@ -71,12 +71,12 @@
                         for (var i = 0; i < data.data.length; i++) {
                             var row = $("<div class='row'></div>");
                             var game1 = data.data[i];
-                            var btn1 = $('<button class="btn btn-outline-primary btn-block mt-2 w-50 float-left" type="submit">清退</button>')
+                            var btn1 = $('<button class="btn btn-outline-warning btn-block mt-2 w-25 float-right" type="submit">清退</button>')
                                 .prop("id", game1.id)
                                 .click(function () {
                                     Clean(game1.id);
                                 });
-                            var btn2 = $('<button class="btn btn-outline-primary btn-block mt-2 w-50 float-right" type="submit">解散</button>')
+                            var btn2 = $('<button class="btn btn-outline-danger btn-block mt-2 w-25 float-left" type="submit">解散</button>')
                                 .prop("id", game1.id)
                                 .click(function () {
                                     Destroy(game1.id);
