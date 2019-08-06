@@ -1,0 +1,95 @@
+﻿@{
+    ViewData["Title"] = "管理";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <button id="RefreshRommList" type="button" class="btn btn-light btn-lg btn-block mb-2">刷新房间</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div id="RoomListContainer" class="container">
+                <div class="row">
+                    <div class="col-6">
+                    </div>
+                    <div class="col-6">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+<script type="text/javascript">$(function () {
+        function RoleMap() {
+            return $.get("/api/game/rolemap")
+                .done(function (data) {
+                    RoleMap.cache = data.data;
+                });
+        }
+
+        function ToRoleDesc(roles) {
+            return roles.reduce(function (r, d, i, arr) {
+                if (i == 0 || arr[i - 1] != d) {
+                    r.push({
+                        "role": d,
+                        "num": 1
+                    });
+                } else {
+                    r[r.length - 1].num++;
+                }
+                return r;
+            }, [])
+                .map(function (d, i) {
+                    return d.num == 1 ? RoleMap.cache[d.role] : (RoleMap.cache[d.role] + "X" + d.num);
+                }).join(", ");
+        }
+
+        function Clean(roomId) {
+            return $.post("/api/game/clean?roomId=" + encodeURIComponent(roomId), null)
+                .done(function (data) {
+                    GetRoomList();
+                });
+        }
+
+        function GetRoomList() {
+            return $.get("/api/game/roomlist")
+                .done(function (data) {
+                    if (data.code == 0) {
+                        $("#RoomListContainer").html("");
+                        for (var i = 0; i < data.data.length; i++) {
+                            var row = $("<div class='row'></div>");
+                            var game1 = data.data[i];
+                            var btn1 = $('<button class="btn btn-outline-primary btn-block mt-2" type="submit">清退</button>')
+                                .prop("id", game1.id)
+                                .click(function () {
+                                    Clean(game1.id);
+                                });
+                            var cap = game1.cards.length - 3;
+                            var need = (cap - game1.players.length);
+                            var info = cap + "人房 ";
+                            info += need > 0 ? ("缺" + need + "人") : "满员";
+                            var players = "";
+                            players += game1.players.map(function (p) { return p.userNick }).join(',');
+                            var roles = "";
+                            roles += ToRoleDesc(game1.cards.map(function (c) { return c.role }));
+
+                            row.append($("<div class='col card text-left pl-0 pr-0 mb-2'></div>")
+                                .append($("<div class='card-body'><div class='card-title clearfix'><h5 class='text-primary float-left'>" + game1.id + "</h5><div class='float-right'>" + info + "</div></div></div>")
+                                    .append("<div>" + "<span class='font-weight-bold text-primary'>角色: </span>" + roles + "</div>")
+                                    .append("<div>" + "<span class='font-weight-bold text-primary'>玩家: </span>" + players + "</div>")
+                                    .append(btn1)));
+
+                            $("#RoomListContainer").append(row);
+                        }
+                    }
+                });
+        }
+        RoleMap().then(GetRoomList);
+        $("#RefreshRommList").click(GetRoomList);
+    });</script>
+}

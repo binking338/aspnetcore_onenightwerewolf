@@ -52,8 +52,14 @@ namespace OneNightWerewolf.Web.Controllers.Api
         public Response<bool> New(string roomId, [FromBody]GameRole[] roles, [FromServices] Game game)
         {
             User user = GetUser();
-            if (user == null) 
+            if (user == null)
+            {
                 return Response<bool>.Error(1, "未登录用户");
+            }
+            if (!string.IsNullOrEmpty(user.RoomId))
+            {
+                return Response<bool>.Error(5, $"当前在房间[{user.RoomId}]中");
+            }
 
             if (roles == null || roles.Length < 3)
             {
@@ -68,7 +74,6 @@ namespace OneNightWerewolf.Web.Controllers.Api
                 }
                 else
                 {
-
                     if (!game.ChangeCards(roles))
                     {
                         return Response<bool>.Error(11, "游戏中不能换卡");
@@ -176,6 +181,29 @@ namespace OneNightWerewolf.Web.Controllers.Api
         }
 
         [HttpPost]
+        public Response<bool> Clean([FromQuery]string roomId, [FromServices] Game game)
+        {
+            game.SetRoomId(roomId);
+            var players = game.GetPlayers();
+            foreach(var player in players)
+            {
+                if (player != null)
+                {
+                    var kickUser = userProvider.Get(player.UserId);
+                    if (kickUser != null && !string.IsNullOrEmpty(kickUser.RoomId))
+                    {
+                        game.Leave(kickUser);
+                    }
+                    else
+                    {
+                        game.Kick(player.SeatNo);
+                    }
+                }
+            }
+            return Response<bool>.Return(true);
+        }
+
+        [HttpPost]
         public Response<bool> Start([FromServices] Game game)
         {
             User user = GetUser();
@@ -221,16 +249,26 @@ namespace OneNightWerewolf.Web.Controllers.Api
             return Response<Player[]>.Return(game.GetPlayers().ToArray());
         }
         [HttpGet]
-        public Response<String[]> Roles([FromServices] Game game)
+        public Response<GameRole[]> Roles([FromServices] Game game)
         {
             User user = GetUser();
             if (user == null)
-                return Response<String[]>.Error(1, "未登录用户");
+                return Response<GameRole[]>.Error(1, "未登录用户");
             if (string.IsNullOrEmpty(user.RoomId))
-                return Response<String[]>.Error(7, $"不在任何房间中");
+                return Response<GameRole[]>.Error(7, $"不在任何房间中");
             game.SetRoomId(user.RoomId);
-            var roles = game.GetAllCards().Select(card => game.GetRoleDesc(card.Role)).ToArray();
-            return Response<String[]>.Return(roles);
+            var roles = game.GetAllCards().Select(card => card.Role).ToArray();
+            return Response<GameRole[]>.Return(roles);
+        }
+
+        [HttpGet]
+        public Response<Dictionary<int, String>> RoleMap([FromServices] Game game)
+        {
+            Dictionary<int, string> map = new Dictionary<int, string>();
+            foreach(GameRole role in Enum.GetValues(typeof(GameRole))){
+                map.Add((int)role, game.GetRoleDesc(role));
+            }
+            return Response<Dictionary<int, String>>.Return(map);
         }
 
         [HttpGet]

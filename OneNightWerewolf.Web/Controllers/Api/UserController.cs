@@ -27,21 +27,43 @@ namespace OneNightWerewolf.Web.Controllers.Api
             return sessionId;
         }
 
-        [HttpPost]
-        public async Task<Response<bool>> SignIn(string nick)
+        private string GetUserId()
         {
+            return HttpContext.User.Identity.Name;
+        }
+
+        [HttpPost]
+        public async Task<Response<bool>> SignIn(string nick, string password)
+        {
+            if(nick.Length > 20 || password.Length > 20)
+            {
+                // 名字密码太长
+                return Response<bool>.Error(-1, "用户名和密码不能超过20个字符！");
+            }
+            var userId = nick;
+            User user = userProvider.Get(userId);
+            if (userProvider.Get(userId) != null)
+            {
+                if (user.ClientId != GetClientId() && user.Password != password)
+                {
+                    return Response<bool>.Error(-2, "密码不正确！");
+                }
+            }
+
             var claims = new List<Claim>
                 {
-                    new Claim("user", GetClientId()),
+                    new Claim("user", userId),
                     new Claim("role", "player"),
                     new Claim("nick", nick),
                 };
 
             await HttpContext.SignInAsync(new ClaimsPrincipal(new ClaimsIdentity(claims, "Cookies", "user", "role")), new AuthenticationProperties() { IsPersistent = true });
 
-            User user = new User()
+            user = new User()
             {
-                Id = GetClientId(),
+                Id = userId,
+                Password = password,
+                ClientId = GetClientId(),
                 Nick = nick
             };
             userProvider.Set(user);
@@ -60,7 +82,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
         [HttpGet]
         public Response<User> Info()
         {
-            var user = userProvider.Get(GetClientId());
+            var user = userProvider.Get(GetUserId());
             return Response<User>.Return(user);
         }
     }

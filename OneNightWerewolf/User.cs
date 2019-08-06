@@ -9,6 +9,10 @@ namespace OneNightWerewolf
 
         public string Id { get; set; }
 
+        public string Password { get; set; }
+
+        public string ClientId { get; set; }
+
         public string Nick { get; set; }
 
         public string RoomId { get; set; }

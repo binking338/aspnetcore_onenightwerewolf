@@ -12,6 +12,17 @@
                     <span class="input-group-text" id="basic-addon1">昵称</span>
                 </div>
                 <input id="Nick" type="text" class="form-control form-control-lg" placeholder="取个嚣张的名字先！" aria-label="Username" aria-describedby="basic-addon1">
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">密码</span>
+                </div>
+                <input id="Password" type="password" class="form-control form-control-lg" placeholder="防止冒名！" aria-label="Password" aria-describedby="basic-addon1">
                 <div class="input-group-append">
                     <button id="Submit" class="btn btn-outline-primary btn-lg" type="button">登录</button>
                 </div>
@@ -29,12 +40,27 @@
 <script type="text/javascript">$(function () {
         function Login() {
             var nick = $("#Nick").val();
+            var pwd = $("#Password").val();
             if (!nick) {
                 $("#Nick").focus();
                 return;
             }
-            $.post("/api/user/signin?nick=" + encodeURIComponent(nick), null)
+            if (nick.length > 20) {
+                alert("昵称不能超过20个字符！")
+            }
+            if (!pwd) {
+                $("#Password").focus();
+                return;
+            }
+            if (pwd.length > 20) {
+                alert("密码不能超过20个字符！")
+            }
+
+            $.post("/api/user/signin?nick=" + encodeURIComponent(nick) + "&password=" + encodeURIComponent(pwd), null)
                 .done(function (data) {
+                    if(data.code != 0){
+                        alert(data.message);
+                    }
                     window.location = "/";
                 });
         }

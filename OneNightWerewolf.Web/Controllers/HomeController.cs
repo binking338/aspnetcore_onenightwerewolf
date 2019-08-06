@@ -59,6 +59,11 @@ namespace OneNightWerewolf.Web.Controllers
             return View(user);
         }
 
+        public IActionResult Admin()
+        {
+            return View();
+        }
+
         public IActionResult Intro()
         {
             return View();

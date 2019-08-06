@@ -36,8 +36,8 @@
                 </div>
                 <input id="RoomId" type="text" value="@Model.RoomId" placeholder="房间别进错" class="form-control form-control-lg" aria-label="RoomId" aria-describedby="basic-addon1">
                 <div class="input-group-append">
-                    <button id="Join" class="btn btn-outline-primary btn-lg" type="button">进入</button>
-                    <button id="Leave" class="btn btn-outline-danger btn-lg" type="button">离开</button>
+                    <button id="Leave" class="btn btn-danger btn-lg" type="button">离开</button>
+                    <button id="Join" class="btn btn-primary btn-lg" type="button">进入</button>
                 </div>
             </div>
         </div>
@@ -50,7 +50,7 @@
                 </div>
                 <input id="Roles" type="text" value="@ViewData["room.roles"]" placeholder="角色编号参照简介" class="form-control form-control-lg" aria-label="Roles" aria-describedby="basic-addon1">
                 <div class="input-group-append">
-                    <button id="New" class="btn btn-outline-primary btn-lg" type="button">创建</button>
+                    <button id="New" class="btn btn-primary btn-lg" type="button">创建</button>
                     <button type="button" class="btn btn-primary btn-lg dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
@@ -79,7 +79,7 @@
     </div>
     <div class="row">
         <div class="col">
-            <button id="RefreshRommList" type="button" class="btn btn-primary btn-lg btn-block mb-2">刷新房间</button>
+            <button id="RefreshRommList" type="button" class="btn btn-light btn-lg btn-block mb-2">刷新房间</button>
         </div>
     </div>
     <div class="row">
@@ -182,6 +182,30 @@
             return $("#EnableCountDown").is(":checked")
         }
 
+        function RoleMap() {
+            return $.get("/api/game/rolemap")
+                .done(function (data) {
+                    RoleMap.cache = data.data;
+                });
+        }
+
+        function ToRoleDesc(roles) {
+            return roles.reduce(function (r, d, i, arr) {
+                if (i == 0 || arr[i - 1] != d) {
+                    r.push({
+                        "role": d,
+                        "num": 1
+                    });
+                } else {
+                    r[r.length - 1].num++;
+                }
+                return r;
+            }, [])
+                .map(function (d, i) {
+                    return d.num == 1 ? RoleMap.cache[d.role] : (RoleMap.cache[d.role] + "X" + d.num);
+                }).join(", ");;
+        }
+
         function IsRoomMaster() {
             return $.get("/api/game/isroommaster")
                 .done(function (data) {
@@ -202,14 +226,14 @@
         }
 
         function GetRoomList() {
-            return $.get("api/game/roomlist")
+            return $.get("/api/game/roomlist")
                 .done(function (data) {
                     if (data.code == 0) {
                         $("#RoomListContainer").html("");
                         for (var i = 0; i < data.data.length; i++) {
                             var row = $("<div class='row'></div>");
                             var game1 = data.data[i];
-                            var btn1 = $('<button class="btn btn-primary btn-block" type="submit">加入</button>')
+                            var btn1 = $('<button class="btn btn-outline-primary btn-block mt-2" type="submit">加入</button>')
                                 .prop("id", game1.id)
                                 .click(function () {
                                     $("#RoomId").val($(this).prop("id"));
@@ -217,14 +241,17 @@
                                 });
                             var cap = game1.cards.length - 3;
                             var need = (cap - game1.players.length);
-                            var info = cap + "人房,";
+                            var info = cap + "人房 ";
                             info += need > 0 ? ("缺" + need + "人") : "满员";
-                            info += ": ";
-                            info += game1.players.map(function (p) { return p.userNick }).join(',');
+                            var players = "";
+                            players += game1.players.map(function (p) { return p.userNick }).join(',');
+                            var roles = "";
+                            roles += ToRoleDesc(game1.cards.map(function (c) { return c.role }));
 
                             row.append($("<div class='col card text-left pl-0 pr-0 mb-2'></div>")
-                                .append($("<div class='card-body'><div class='card-title'><h5>" + game1.id + "</h5></div></div>")
-                                    .append("<div>" + info + "</div>")
+                                .append($("<div class='card-body'><div class='card-title clearfix'><h5 class='text-primary float-left'>" + game1.id + "</h5><div class='float-right'>" + info + "</div></div></div>")
+                                    .append("<div>" + "<span class='font-weight-bold text-primary'>角色: </span>" + roles + "</div>")
+                                    .append("<div>" + "<span class='font-weight-bold text-primary'>玩家: </span>" + players + "</div>")
                                     .append(btn1)));
 
                             $("#RoomListContainer").append(row);
@@ -418,22 +445,9 @@
                         //alert(data.message);
                         $("#RoleContainer").html($("<h6 class='text-danger'>").html("请先加入房间"));
                     } else {
-                        var roles = data.data.reduce(function (r, d, i, arr) {
-                            if (i == 0 || arr[i - 1] != d) {
-                                r.push({
-                                    "role": d,
-                                    "num": 1
-                                });
-                            } else {
-                                r[r.length - 1].num++;
-                            }
-                            return r;
-                        }, [])
-                            .map(function (d, i) {
-                                return d.num == 1 ? d.role : (d.role + "X" + d.num);
-                            });
+                        var roles = ToRoleDesc(data.data)
                         $("#RoleContainer").html("");
-                        $("#RoleContainer").append(roles.join(",&nbsp;"));
+                        $("#RoleContainer").append(roles);
                     }
                 });
         }
@@ -544,10 +558,10 @@
 
         function RoomButtonConfig(isEnter) {
             if (isEnter) {
-                $('#Join').hide();
+                //$('#Join').hide();
                 $('#Leave').show();
             } else {
-                $('#Join').show();
+                //$('#Join').show();
                 $('#Leave').hide();
             }
         }
@@ -555,7 +569,6 @@
         $("#RefreshRommList").click(GetRoomList);
         GetRoomList();
 
-        $('#Join').click(Join);
         $('#New').click(New);
         $('#New3').click(function () {
             $('#Roles').val("0,1,1,4,5,6");
@@ -625,8 +638,9 @@
             $('#Roles').val("0,0,0,1,1,2,4,5,6,11");
             New();
         });
-        $('#Start').click(Start); 33
+        $('#Join').click(function () { Leave().then(Join) });
         $('#Leave').click(Leave);
+        $('#Start').click(Start);
         $('#MyOptions').click(MyOptions);
         $('#EnableCountDown').change(function () {
             if (IsCountDownEnabled()) {
@@ -643,7 +657,7 @@
                 $('#Join').triggerHandler('click');
             }
         });
-        $('#MyOptions').click();
+        RoleMap().then(MyOptions);
     });</script>
 
 
@@ -651,7 +665,7 @@
     {
         <script type="text/javascript">$(function () {
                 $('#ConfigContainer').hide();
-                $('#Join').hide();
+                //$('#Join').hide();
             });</script>
     }
     else
