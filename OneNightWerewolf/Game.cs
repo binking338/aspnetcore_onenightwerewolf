@@ -41,10 +41,10 @@ namespace OneNightWerewolf
             {
                 return false;
             }
-            if (GetCurrentPhase() != GamePhase.Over)
-            {
-                return false;
-            }
+            //if (GetCurrentPhase() != GamePhase.Over)
+            //{
+            //    return false;
+            //}
             var cards = roles.Select(role => new GameCard() { Role = role }).OrderBy(card => card.Role).ToList();
             if (cards.Count == Room.Cards.Count)
             {
