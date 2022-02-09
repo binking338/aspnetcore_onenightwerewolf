@@ -7,14 +7,14 @@
 
 </div>
 @section Scripts{
+<script type="text/javascript" src="/lib/js.cookie.min.js"></script>
 <script type="text/javascript">
     if (window.confirm("确认退出登录？退出登录将会同时退出房间！")) {
-        $.post("/api/game/leave", null)
-            .done(function (data) {
-                $.post('/api/user/logout', null, function () {
-                    window.location = '/';
-                });
-            });
+        $.post('/api/user/logout', null, function () {
+            Cookies.remove('.AspNetCore.Session');
+            Cookies.remove('.AspNetCore.Cookies');
+            window.location = '/';
+        });
     } else {
         window.location = '/';
     }

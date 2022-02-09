@@ -3,8 +3,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:14714",
-      "sslPort": 44321
+      "applicationUrl": "http://localhost:20012",
+      "sslPort": 44345
     }
   },
   "profiles": {
@@ -18,10 +18,10 @@
     "OneNightWerewolf.Web": {
       "commandName": "Project",
       "launchBrowser": true,
+      "applicationUrl": "https://localhost:19843;http://localhost:63530",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "http://localhost:5000"
+      }
     }
   }
 }

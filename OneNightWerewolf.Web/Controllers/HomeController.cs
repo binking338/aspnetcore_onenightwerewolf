@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using OneNightWerewolf.Web.Models;
 
 namespace OneNightWerewolf.Web.Controllers
@@ -12,49 +13,29 @@ namespace OneNightWerewolf.Web.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        UserProvider userProvider;
-        public HomeController(UserProvider userProvider)
-        {
-            this.userProvider = userProvider;
-        }
+        private readonly ILogger<HomeController> _logger;
+        private readonly UserRepository userProvider;
 
-        private string GetUserId()
+        public HomeController(ILogger<HomeController> logger, UserRepository userProvider)
         {
-            return HttpContext.User.Identity.Name;
+            _logger = logger;
+            this.userProvider = userProvider;
         }
 
         private User GetUser()
         {
-            var userId = GetUserId();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return null;
-            }
-            var user = userProvider.Get(userId);
-            if (user == null)
-            {
-                user = new User()
-                {
-                    Id = userId,
-                    Nick = HttpContext.User.FindFirst(c => c.Type == "nick")?.Value
-                };
-                if (string.IsNullOrEmpty(user.Nick))
-                {
-                    user.Nick = "游客" + (DateTime.Now.Ticks / 1000).ToString();
-                }
-                userProvider.Set(user);
-            }
-            return user;
+            return Models.User.GetUser(HttpContext);
         }
 
-        public IActionResult Index([FromServices] UserProvider userProvider, [FromServices] Game game)
+        public IActionResult Index([FromServices] UserRepository userProvider, [FromServices] RoomRepository roomRepository)
         {
             var user = GetUser();
             ViewData["user.nick"] = user.Nick;
-            if (user != null && !string.IsNullOrEmpty(user.RoomId)  && game.RoomProvider.Exist(user.RoomId)) {
-                game.SetRoomId(user.RoomId);
+            if (user != null && !string.IsNullOrEmpty(user.RoomId) && roomRepository.Exist(user.RoomId))
+            {
+                var room = roomRepository.Get(user.RoomId);
                 ViewData["room.id"] = user.RoomId;
-                ViewData["room.roles"] = string.Join(",", game.GetAllCards()?.Select(card => (int)card.Role));
+                ViewData["room.roles"] = string.Join(",", room.Game.Cards?.Select(card => card.No));
             }
             return View(user);
         }
@@ -64,6 +45,7 @@ namespace OneNightWerewolf.Web.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         public IActionResult Intro()
         {
             return View();

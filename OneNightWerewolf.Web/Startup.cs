@@ -8,17 +8,16 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using OneNightWerewolf.Web.Models;
-using Swashbuckle.AspNetCore.Swagger;
 
 namespace OneNightWerewolf.Web
 {
     public class Startup
     {
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -29,24 +28,18 @@ namespace OneNightWerewolf.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
+            services.AddControllersWithViews();
 
             services.AddSession();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "One Night Ultimate Werewolf",
                     Description = "One Night Ultimate Werewolf ASP.NET Core Web API",
-                    TermsOfService = "None",
+                    TermsOfService = new Uri("/"),
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
@@ -54,19 +47,19 @@ namespace OneNightWerewolf.Web
                 var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) // Sets the default scheme to cookies
-                .AddCookie(options =>
-                {
-                });
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                // Sets the default scheme to cookies
+                .AddCookie(options => { });
+            services.AddAuthorization(options => { });
             services.AddHttpContextAccessor();
 
-            services.AddSingleton<UserProvider>();
-            services.AddSingleton<GameRoomProvider>();
-            services.AddTransient<Game>();
+
+            services.AddSingleton<UserRepository>();
+            services.AddSingleton<RoomRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -78,10 +71,9 @@ namespace OneNightWerewolf.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
-            //app.UseCookiePolicy();
+
             app.UseSession();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -91,15 +83,19 @@ namespace OneNightWerewolf.Web
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "One Night Ultimate Werewolf V1");
             });
 
+            app.UseRouting();
+
             app.UseAuthentication();
-            app.UseMvc(routes =>
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

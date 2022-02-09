@@ -1,19 +1,32 @@
-﻿@model OneNightWerewolf.User;
+﻿@model OneNightWerewolf.Web.Models.User;
 @{
     ViewData["Title"] = "首页";
     if (ViewData["room.roles"] == null)
     {
-        ViewData["room.roles"] = "0,0,0,1,1,4,5,6"; // 经典牌型
+        ViewData["room.roles"] = "01,01,01,02,02,05,06,07"; // 经典牌型
     }
 }
 <div class="container">
+    <div class="row">
+        <div class="col-2 pr-0 pl-0 align-middle text-right">
+            <h6>我:</h6>
+        </div>
+        <div class="col-3">
+            <h6 id="UserContainer">@ViewData["user.nick"]</h6>
+        </div>
+        <div class="col-4 pr-0 pl-0 align-middle text-right">
+            <h6>时间:</h6>
+        </div>
+        <div class="col-3">
+            <h6 id="TimeContainer"></h6>
+        </div>
+    </div>
     <div class="row">
         <div class="col text-center">
             <div class="btn-group  mb-3" role="group" aria-label="Game Menu">
                 <button id="Config" type="button" class="btn btn-primary btn-lg">设置</button>
                 <button id="Start" type="button" class="btn btn-primary btn-lg" disabled>开始</button>
-                <button id="History" type="button" class="btn btn-primary btn-lg">历史</button>
-                <button id="MyOptions" type="button" class="btn btn-primary btn-lg">刷新&nbsp;<span id="CountDown" style="display: inline-block; width: 1em"></span></button>
+                <button id="Choices" type="button" class="btn btn-primary btn-lg">刷新&nbsp;<span id="CountDown" style="display: inline-block; width: 1em"></span></button>
                 <button type="button" class="btn btn-primary btn-lg dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="sr-only">Toggle Dropdown</span>
                 </button>
@@ -55,23 +68,23 @@
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu">
-                        <button id="New3" roles="0,1,1,4,5,6" class="dropdown-item btn btn-outline-primary btn-lg" type="button">3人局</button>
-                        <button id="New4" roles="0,0,1,1,4,5,6" class="dropdown-item btn btn-outline-primary btn-lg" type="button">4人局</button>
-                        <button id="New5" roles="0,0,0,1,1,4,5,6" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局</button>
-                        <button id="New6_zy" roles="0,0,0,1,1,2,4,5,6" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙</button>
-                        <button id="New6_jg" roles="0,0,0,1,1,4,5,6,7" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼</button>
-                        <button id="New6_smz" roles="0,0,0,1,1,4,5,6,8" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+失眠者</button>
-                        <button id="New6_lr" roles="0,0,0,1,1,4,5,6,9" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+猎人</button>
-                        <button id="New6_pj" roles="0,0,0,1,1,4,5,6,10" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+皮匠</button>
-                        <button id="New6_yl" roles="0,0,0,1,1,4,5,6,11" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+幽灵</button>
-                        <button id="New7_zy_jg" roles="0,0,0,1,1,2,4,5,6,7" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+酒鬼</button>
-                        <button id="New7_zy_smz" roles="0,0,0,1,1,2,4,5,6,8" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+失眠者</button>
-                        <button id="New7_zy_lr" roles="0,0,0,1,1,2,4,5,6,9" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+猎人</button>
-                        <button id="New7_jg_smz" roles="0,0,0,1,1,4,5,6,7,8" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼+失眠者</button>
-                        <button id="New7_jg_lr" roles= "0,0,0,1,1,4,5,6,7,9"class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼+猎人</button>
-                        <button id="New7_smz_lr" roles="0,0,0,1,1,4,5,6,8,9" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+失眠者+猎人</button>
-                        <button id="New7_syr" roles="0,0,0,1,1,4,5,6,3,3" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+2守夜人</button>
-                        <button id="New7_zy_yl" roles="0,0,0,1,1,2,4,5,6,11" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+幽灵</button>
+                        <button id="New3" roles="01,02,02,05,06,07" class="dropdown-item btn btn-outline-primary btn-lg" type="button">3人局</button>
+                        <button id="New4" roles="01,01,02,02,05,06,07" class="dropdown-item btn btn-outline-primary btn-lg" type="button">4人局</button>
+                        <button id="New5" roles="01,01,01,02,02,05,06,07" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局</button>
+                        <button id="New6_zy" roles="01,01,01,02,02,03,05,06,07" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙</button>
+                        <button id="New6_jg" roles="01,01,01,02,02,05,06,07,08" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼</button>
+                        <button id="New6_smz" roles="01,01,01,02,02,05,06,07,09" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+失眠者</button>
+                        <button id="New6_lr" roles="01,01,01,02,02,05,06,07,10" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+猎人</button>
+                        <button id="New6_pj" roles="01,01,01,02,02,05,06,07,11" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+皮匠</button>
+                        <button id="New6_yl" roles="0,0,0,1,1,05,06,07,12" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+幽灵</button>
+                        <button id="New7_zy_jg" roles="01,01,01,02,02,03,05,06,07,08" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+酒鬼</button>
+                        <button id="New7_zy_smz" roles="01,01,01,02,02,03,05,06,07,09" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+失眠者</button>
+                        <button id="New7_zy_lr" roles="01,01,01,02,02,03,05,06,07,10" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+猎人</button>
+                        <button id="New7_jg_smz" roles="01,01,01,02,02,05,06,07,08,09" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼+失眠者</button>
+                        <button id="New7_jg_lr" roles="01,01,01,02,02,05,06,07,08,10" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+酒鬼+猎人</button>
+                        <button id="New7_smz_lr" roles="01,01,01,02,02,05,06,07,09,10" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+失眠者+猎人</button>
+                        <button id="New7_syr" roles="01,01,01,02,02,04,04,05,06,07" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+2守夜人</button>
+                        <button id="New7_zy_yl" roles="01,01,01,02,02,03,05,06,07,13" class="dropdown-item btn btn-outline-primary btn-lg" type="button">5人局+爪牙+幽灵</button>
                     </div>
                 </div>
             </div>
@@ -112,29 +125,19 @@
             <h6 id="PlayerContainer"></h6>
         </div>
     </div>
-    <div class="row">
-        <div class="col-2 pr-0 pl-0 align-middle text-right">
-            <h6>用户:</h6>
-        </div>
-        <div class="col-3">
-            <h6 id="UserContainer">@ViewData["user.nick"]</h6>
-        </div>
-        <div class="col-2 pr-0 pl-0 align-middle text-right">
-            <h6>时间:</h6>
-        </div>
-        <div class="col-5">
-            <h6 id="TimeContainer"></h6>
-        </div>
+    <div class="container" id="MonitorContainer">
     </div>
-    <div class="row pt-2">
-        <div class="col text-center" id="OptionContainer">
-        </div>
+    <div class="container pt-2  text-center" id="ChoicesContainer">
     </div>
+    @*<div class="row pt-2">
+            <div class="col text-center" id="ChoicesContainer">
+            </div>
+        </div>*@
 </div>
 
 
 @section Scripts{
-<script type="text/javascript">$(function () {
+    <script type="text/javascript">$(function () {
 
         function R(a, b) {
             return parseInt(a + Math.random() * Math.abs(b - a));
@@ -154,16 +157,17 @@
                     $("selector").text("0");
                     cb();
                 } else {
-                    CountDown(t - 1, cb, selector);
+                    callee(t - 1, cb, selector);
                 }
             }, 1000);
         }
 
         function CancelCountDown(selector) {
+            var callee = CountDown;
             selector = selector || "#CountDown";
-            if (arguments.callee[selector]) {
-                clearTimeout(arguments.callee[selector]);
-                arguments.callee[selector] = null;
+            if (callee[selector]) {
+                clearTimeout(callee[selector]);
+                callee[selector] = null;
             }
             $(selector).text("");
         }
@@ -174,7 +178,7 @@
 
         function ToggleAutoRefresh() {
             if (IsAutoRefreshEnabled()) {
-                MyOptions();
+                Choices();
             } else {
                 CancelCountDown();
             }
@@ -183,21 +187,21 @@
         function AutoNextPhase() {
             if (IsAutoRefreshEnabled()) {
                 CountDown(3, function () {
-                    MyOptions();
+                    Choices();
                 });
             } else {
                 CancelCountDown();
             }
         }
 
-        function GetRoleMap() {
-            return $.get("/api/game/rolemap")
+        function CardMap() {
+            return $.get("/api/game/cardmap")
                 .done(function (data) {
-                    GetRoleMap.cache = data.data;
+                    CardMap.cache = data.data;
                 });
         }
 
-        function ToRoleDesc(roles) {
+        function ToCardName(roles) {
             return roles.reduce(function (r, d, i, arr) {
                 if (i == 0 || arr[i - 1] != d) {
                     r.push({
@@ -210,30 +214,30 @@
                 return r;
             }, [])
                 .map(function (d, i) {
-                    return d.num == 1 ? GetRoleMap.cache[d.role] : (GetRoleMap.cache[d.role] + "X" + d.num);
+                    return d.num == 1 ? CardMap.cache[d.role] : (CardMap.cache[d.role] + "X" + d.num);
                 }).join(", ");;
         }
 
-        function IsRoomMaster() {
-            return $.get("/api/game/isroommaster")
+        function Position() {
+            return $.get("/api/game/position")
                 .done(function (data) {
-                    if (data.data) {
+                    Position.cache = data.data;
+                    if (IamRoomHolder()) {
                         $("#Start").removeAttr("disabled");
                         $("#Start").show();
-                        IsRoomMaster.cache = true;
                     } else {
                         $("#Start").attr("disabled", "disabled");
                         $("#Start").hide();
-                        IsRoomMaster.cache = false;
+                        Position.cache = data.data;
                     }
                 });
         }
 
-        function IsRoomMasterByCache() {
-            return IsRoomMaster.cache;
+        function IamRoomHolder() {
+            return Position.cache.isHolder;
         }
 
-        function GetRoomList() {
+        function RoomList() {
             return $.get("/api/game/roomlist")
                 .done(function (data) {
                     if (data.code == 0) {
@@ -247,14 +251,14 @@
                                     $("#RoomId").val($(this).prop("id"));
                                     Leave().then(Join);
                                 });
-                            var cap = game1.cards.length - 3;
+                            var cap = game1.playerLimit;
                             var need = (cap - game1.players.length);
                             var info = cap + "人房 ";
                             info += need > 0 ? ("缺" + need + "人") : "满员";
                             var players = "";
-                            players += game1.players.map(function (p) { return p.userNick }).join(',');
+                            players += game1.players.map(function (p) { return p.nick }).join(',');
                             var roles = "";
-                            roles += ToRoleDesc(game1.cards.map(function (c) { return c.role }));
+                            roles += ToCardName(game1.cards);
 
                             row.append($("<div class='col card text-left pl-0 pr-0 mb-2'></div>")
                                 .append($("<div class='card-body'><div class='card-title clearfix'><h5 class='text-primary float-left'>" + game1.id + "</h5><div class='float-right'>" + info + "</div></div></div>")
@@ -268,41 +272,40 @@
                 });
         }
 
-        function DawnClock() {
+        function DawnClock(dawntime, overtime) {
             var callee = arguments.callee;
             var selector = arguments.callee.container = "#TimeContainer";
-            $.get("/api/game/getdawntime")
-                .done(function (data) {
+            if (callee.handler) {
+                clearTimeout(callee.handler);
+                callee.handler = null;
+                callee.time = null;
+                callee.overtime = null;
+            }
+            if (dawntime <= 0) {
+                $(selector).text("--:--");
+            } else {
+                callee.dawntime = dawntime;
+                callee.overtime = overtime;
+                (function () {
+                    callee.handler = null;
+                    overtime = DawnClock.overtime || (new Date().getTime() / 1000);
+                    var duration = parseInt(overtime - DawnClock.dawntime);
+                    $(selector).text(parseInt(duration / 60) + ":" + (duration % 60 < 10 ? "0" + duration % 60 : duration % 60));
+
                     if (callee.handler) {
                         clearTimeout(callee.handler);
-                        callee.handler = null;
-                        callee.time = null;
                     }
-                    if (data.data <= 0) {
-                        $(selector).text("--:--");
-                    } else {
-                        var time = new Date().getTime() - (data.data * 1000)
-                        callee.time = time;
-                        (function () {
-                            callee.handler = null;
-                            var duration = parseInt((new Date().getTime() - DawnClock.time) / 1000);
-                            $(selector).text(parseInt(duration / 60) + ":" + (duration % 60 < 10 ? "0" + duration % 60 : duration % 60));
-
-                            if (callee.handler) {
-                                clearTimeout(callee.handler);
-                            }
-                            callee.handler = setTimeout(arguments.callee, 1000)
-                        })();
-                    }
-                });
+                    callee.handler = setTimeout(arguments.callee, 1000)
+                })();
+            }
         }
 
-        function MyOptions() {
-            IsRoomMaster();
-            Roles();
-            Players();
-            DawnClock();
-            return $.get("/api/game/myoptionsdesc", null).done(function (data) {
+        function Choices() {
+            Cards();
+            Buddies();
+            Position();
+            Screen();
+            return $.get("/api/game/choices", null).done(function (data) {
                 if (data.code > 0) {
                     if (data.code == 1) {
                         // 没登录
@@ -310,90 +313,87 @@
                     } else if (data.code == 7) {
                         // 无房间
                         ConfigRoomButton(false);
-                        $("#OptionContainer").html("")
+                        $("#ChoicesContainer").html("")
                     }
                     //alert(data.message);
+
                 } else {
-                    if (data.data == null || data.data.options == null || data.data.options.length == 0) {
-                        // 获取上次的信息
-                        MyLastOptionDesc();
+                    AutoNextPhase();
+                    if (data.data == null) {
                         return;
                     }
-                    if (data.data && data.data.options && data.data.options.length == 1) {
-                        // Action(0); // 自动选择
-                        // return;
+                    if (data.data.game != null) {
+                        var dawnTime = data.data.game.dawnTime || 0;
+                        var overTime = data.data.game.overTime;
+                        DawnClock(dawnTime, overTime);
                     }
 
                     var descs = data.data;
 
-                    var isDayPhase = descs.phase.match(/天亮/);
-                    var isStartPhase = descs.phase.match(/游戏开始/);
-                    var isOverPhase = descs.phase.match(/游戏结束/);
-
-                    $("#OptionContainer")
+                    $("#ChoicesContainer")
                         .html("")
-                        .append("<h3>" + descs.phase + "</h3>");
+                        .append("<h3>" + (descs.game.inGame ? descs.round.phaseName : "等待房主开始") + "</h3>");
 
-
-                    descs.options.forEach(function (desc, i) {
-                        var btn = $("<a href='javascript:void(0)' />").text(desc);
-                        if (isDayPhase) {
-                            btn.click(function () {
-                                if (window.confirm("确定" + desc + "?")) {
-                                    Action(i);
-                                }
+                    if (data.data.choices != null && data.data.choices.length > 0) {
+                        var isStartRound = descs.round.phase == 0;
+                        var isOverRound = descs.round.phase == 99;
+                        var isVoteRound = descs.round.phase == 30 && descs.round.name == '投票';
+                        var isNightPhase = descs.round.phase == 10;
+                        if (isStartRound || isVoteRound || isOverRound) {
+                            /* 身份 投票 结束 阶段不自动选 */
+                            CancelCountDown();
+                        } else if (isNightPhase && IsAutoRefreshEnabled()) {
+                            CountDown(R(10, 15), function () {
+                                var idx = R(0, descs.choices.length);
+                                Action(descs.choices[idx]);
                             });
                         } else {
-                            btn.click(function () {
-                                Action(i);
+                            CountDown(R(1, 3), function () {
+                                var idx = R(0, descs.choices.length);
+                                Action(descs.choices[idx]);
                             });
                         }
-                        $("#OptionContainer").append($("<h3>").append(btn));
-                    });
-                    if (!isStartPhase && !isOverPhase && !isDayPhase && IsAutoRefreshEnabled()) {
-                        CountDown(R(15, 20), function () {
-                            Action(R(0, descs.options.length));
+                        descs.choices.forEach(function (desc, i) {
+                            var btn = $("<a href='javascript:void(0)' />").text(desc);
+                            if (isVoteRound) {
+                                btn.click(function () {
+                                    if (window.confirm("确定" + desc + "?")) {
+                                        Action(desc);
+                                    }
+                                });
+                            } else {
+                                btn.click(function () {
+                                    Action(desc);
+                                });
+                            }
+                            $("#ChoicesContainer").append($("<h3>").append(btn));
                         });
-                    } else {
-                        CancelCountDown();
                     }
                 }
             });
         }
 
-        function MyLastOptionDesc() {
-            return $.get("/api/game/mylastoptiondesc", null)
+        function Screen() {
+            return $.get("/api/game/screen", null)
                 .done(function (data) {
                     if (data.code > 0) {
-                        if (data.code == 1) {
-                            // 没登录
-                            window.location = window.location;
-                        } else if (data.code == 7) {
-                            // 无房间
-                            MyOptions();
-                            return;
-                        }
                         //alert(data.message);
                     } else {
-                        AutoNextPhase();
-                        if (data.data == null || data.data.options == null || data.data.options.length == 0) {
-                            $("#OptionContainer").html("")
+                        $("#MonitorContainer").html("");
+                        if (data.data == null || data.data.length == 0) {
                             return;
                         }
-
-                        var descs = data.data;
-                        $("#OptionContainer").html("<br/>").append("<h3>" + descs.phase + "</h3>");
-                        var actionResult = descs.options[0].split("\n\n");
-                        $("#OptionContainer").append($("<h3>").html(actionResult[0].replace("=>", "：")));
-                        if (actionResult.length > 1)
-                            $("#OptionContainer").append(actionResult[1].replace(/\n/g, "<br/>"));
-
+                        data.data.forEach(function (msg, i) {
+                            $("#MonitorContainer").append($('<div class="row">')
+                                .append($('<div class="col-12">').append($("<h6>").text(msg.content))));
+                            ;
+                        });
                     }
                 });
         }
 
-        function Action(option) {
-            return $.post("/api/game/action?no=" + option, null)
+        function Action(choice) {
+            return $.post("/api/game/action?choice=" + encodeURIComponent(choice), null)
                 .done(function (data) {
                     if (data.code > 0) {
                         if (data.code == 1) {
@@ -401,28 +401,18 @@
                             window.location = window.location;
                         } else if (data.code == 7) {
                             // 无房间
-                            MyOptions();
+                            Choices();
                             return;
                         } else {
                             alert(data.message);
                         }
                     }
-                    MyLastOptionDesc();
+                    Choices();
                 });
         }
 
-        function History() {
-            return $.get("/api/game/myinfo")
-                .done(function (data) {
-                    if (data.code > 0) {
-                    } else {
-                        alert(data.data);
-                    }
-                });
-        }
-
-        function Players() {
-            return $.get("/api/game/players")
+        function Buddies() {
+            return $.get("/api/game/buddies")
                 .done(function (data) {
                     if (data.code > 0) {
                         //alert(data.message);
@@ -433,12 +423,12 @@
                         $("#PlayerContainer")
                             .append(data.data.map(function (p, i) {
                                 if (i == 0) {
-                                    var masterbtn = $("<a href='javascript:void(0)' />").append("[P" + p.seatNo + "]");
-                                    return $("<span>").append(masterbtn).append(p.userNick);
+                                    var masterbtn = $("<a href='javascript:void(0)' />").append("[H]");
+                                    return $("<span>").append(masterbtn).append(p.nick);
                                 } else {
-                                    var kickbtn = $("<a href='javascript:void(0)' />").append("[P" + p.seatNo + "]");
-                                    if (IsRoomMasterByCache()) kickbtn.click(function () { Kick(p); });
-                                    return $("<span>").append(",&nbsp;").append(kickbtn).append(p.userNick);
+                                    var kickbtn = $("<a href='javascript:void(0)' />").append("[P]");
+                                    if (IamRoomHolder()) kickbtn.click(function () { Kick(p); });
+                                    return $("<span>").append(",&nbsp;").append(kickbtn).append(p.nick);
                                 }
                             }));
 
@@ -446,14 +436,14 @@
                 });
         }
 
-        function Roles() {
-            $.get("/api/game/roles")
+        function Cards() {
+            $.get("/api/game/cards")
                 .done(function (data) {
                     if (data.code > 0) {
                         //alert(data.message);
                         $("#RoleContainer").html($("<h6 class='text-danger'>").html("请先加入房间"));
                     } else {
-                        var roles = ToRoleDesc(data.data)
+                        var roles = ToCardName(data.data)
                         $("#RoleContainer").html("");
                         $("#RoleContainer").append(roles);
                     }
@@ -466,15 +456,13 @@
                     if (data.code > 0) {
                         alert(data.message);
                     } else {
-                        //$("#OptionContainer").html("").append($("<h3>").html("游戏已开始，请刷新"));
-                        //AutoNextPhase();
-                        MyOptions();
+                        Choices();
                     }
                 });
         }
 
         function Leave() {
-            if (IsRoomMasterByCache() && !window.confirm("你是房主，确定离开房间么？")) {
+            if (IamRoomHolder() && !window.confirm("你是房主，确定离开房间么？")) {
                 return;
             }
             return $.post("/api/game/leave", null)
@@ -483,19 +471,19 @@
                         //alert(data.message);
                     }
                     ConfigRoomButton(false);
-                    MyOptions();
-                    IsRoomMaster();
+                    Choices();
+                    Position();
                 });
         }
 
         function Kick(player) {
-            if (window.confirm("确认踢出玩家：" + player.userNick)) {
-                return $.post("/api/game/kick?seatNo=" + player.seatNo, null)
+            if (window.confirm("确认踢出玩家：" + player.nick)) {
+                return $.post("/api/game/kick?id=" + encodeURIComponent(player.id), null)
                     .done(function (data) {
                         if (data.code > 0) {
                             alert(data.message);
                         } else {
-                            MyOptions();
+                            Choices();
                         }
                     });
             }
@@ -514,9 +502,9 @@
                     } else {
                         ConfigRoomButton(true);
                         Config();
-                        MyOptions();
+                        Choices();
                     }
-                    IsRoomMaster();
+                    Position();
                 });
         }
 
@@ -532,7 +520,7 @@
                 return;
             }
             try {
-                roles = roles.split(',').map(i => parseInt(i));
+                roles = roles.split(',').map(i => i);
             }
             catch (e) {
                 $("#Roles").focus();
@@ -540,7 +528,7 @@
             }
             return $.ajax({
                 type: 'POST',
-                url: "/api/game/new?roomId=" + encodeURIComponent(roomId),
+                url: "/api/game/roomnew?roomId=" + encodeURIComponent(roomId),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: JSON.stringify(roles),
@@ -551,22 +539,22 @@
                     } else {
                         ConfigRoomButton(true);
                         Config();
-                        MyOptions();
+                        Choices();
                     }
-                    IsRoomMaster();
+                    Position();
                 }
             });
 
         }
 
-        function NewPreconfig() {
+        function NewByPreConfig() {
             $('#Roles').val($(this).attr("roles"));
             return New();
         }
 
         function Config() {
             if ($("#ConfigContainer").is(":hidden")) {
-                GetRoomList();
+                RoomList();
             }
             $("#ConfigContainer").slideToggle();
             $("#GameDashboard").slideToggle();
@@ -574,46 +562,43 @@
 
         function ConfigRoomButton(isEnter) {
             if (isEnter) {
-                //$('#Join').hide();
                 $('#Leave').show();
             } else {
-                //$('#Join').show();
                 $('#Leave').hide();
             }
         }
 
         $('#New').click(New);
-        $('#New3').click(NewPreconfig);
-        $('#New4').click(NewPreconfig);
-        $('#New5').click(NewPreconfig);
-        $('#New6_zy').click(NewPreconfig);
-        $('#New6_jg').click(NewPreconfig);
-        $('#New6_smz').click(NewPreconfig);
-        $('#New6_lr').click(NewPreconfig);
-        $('#New6_pj').click(NewPreconfig);
-        $('#New6_yl').click(NewPreconfig);
-        $('#New7_zy_jg').click(NewPreconfig);
-        $('#New7_zy_smz').click(NewPreconfig);
-        $('#New7_zy_lr').click(NewPreconfig);
-        $('#New7_jg_smz').click(NewPreconfig);
-        $('#New7_jg_lr').click(NewPreconfig);
-        $('#New7_smz_lr').click(NewPreconfig);
-        $('#New7_syr').click(NewPreconfig);
-        $('#New7_zy_yl').click(NewPreconfig);
+        $('#New3').click(NewByPreConfig);
+        $('#New4').click(NewByPreConfig);
+        $('#New5').click(NewByPreConfig);
+        $('#New6_zy').click(NewByPreConfig);
+        $('#New6_jg').click(NewByPreConfig);
+        $('#New6_smz').click(NewByPreConfig);
+        $('#New6_lr').click(NewByPreConfig);
+        $('#New6_pj').click(NewByPreConfig);
+        $('#New6_yl').click(NewByPreConfig);
+        $('#New7_zy_jg').click(NewByPreConfig);
+        $('#New7_zy_smz').click(NewByPreConfig);
+        $('#New7_zy_lr').click(NewByPreConfig);
+        $('#New7_jg_smz').click(NewByPreConfig);
+        $('#New7_jg_lr').click(NewByPreConfig);
+        $('#New7_smz_lr').click(NewByPreConfig);
+        $('#New7_syr').click(NewByPreConfig);
+        $('#New7_zy_yl').click(NewByPreConfig);
         $('#Join').click(function () { Leave().then(Join) });
-        $('#Leave').click(function () { Leave().then(GetRoomList) });
+        $('#Leave').click(function () { Leave().then(RoomList) });
         $('#Start').click(Start);
-        $('#MyOptions').click(MyOptions);
+        $('#Choices').click(Choices);
         $('#EnableAutoRefresh').change(ToggleAutoRefresh);
-        $('#History').click(History);
         $('#Config').click(Config);
-        $("#RefreshRommList").click(GetRoomList);
+        $("#RefreshRommList").click(RoomList);
         $(document).keydown(function (event) {
             if (event.keyCode == 13) {
                 $('#Join').triggerHandler('click');
             }
         });
-        GetRoleMap().then(MyOptions).then(GetRoomList);
+        CardMap().then(Choices).then(RoomList);
     });</script>
 
     @if (!string.IsNullOrEmpty(Model.RoomId))

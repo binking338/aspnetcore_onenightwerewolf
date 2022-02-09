@@ -25,14 +25,14 @@
 
 @section Scripts{
 <script type="text/javascript">$(function () {
-        function RoleMap() {
-            return $.get("/api/game/rolemap")
+        function CardMap() {
+            return $.get("/api/game/cardmap")
                 .done(function (data) {
-                    RoleMap.cache = data.data;
+                    CardMap.cache = data.data;
                 });
         }
 
-        function ToRoleDesc(roles) {
+        function ToCardName(roles) {
             return roles.reduce(function (r, d, i, arr) {
                 if (i == 0 || arr[i - 1] != d) {
                     r.push({
@@ -45,25 +45,25 @@
                 return r;
             }, [])
                 .map(function (d, i) {
-                    return d.num == 1 ? RoleMap.cache[d.role] : (RoleMap.cache[d.role] + "X" + d.num);
+                    return d.num == 1 ? CardMap.cache[d.role] : (CardMap.cache[d.role] + "X" + d.num);
                 }).join(", ");
         }
 
         function Clean(roomId) {
-            return $.post("/api/game/clean?roomId=" + encodeURIComponent(roomId), null)
+            return $.post("/api/game/roomclean?roomId=" + encodeURIComponent(roomId), null)
                 .done(function (data) {
-                    GetRoomList();
+                    RoomList();
                 });
         }
 
         function Destroy(roomId) {
-            return $.post("/api/game/destroy?roomId=" + encodeURIComponent(roomId), null)
+            return $.post("/api/game/roomdestroy?roomId=" + encodeURIComponent(roomId), null)
                 .done(function (data) {
-                    GetRoomList();
+                    RoomList();
                 });
         }
 
-        function GetRoomList() {
+        function RoomList() {
             return $.get("/api/game/roomlist")
                 .done(function (data) {
                     if (data.code == 0) {
@@ -88,7 +88,7 @@
                             var players = "";
                             players += game1.players.map(function (p) { return p.userNick }).join(',');
                             var roles = "";
-                            roles += ToRoleDesc(game1.cards.map(function (c) { return c.role }));
+                            roles += ToCardName(game1.cards);
 
                             row.append($("<div class='col card text-left pl-0 pr-0 mb-2'></div>")
                                 .append($("<div class='card-body'><div class='card-title clearfix'><h5 class='text-primary float-left'>" + game1.id + "</h5><div class='float-right'>" + info + "</div></div></div>")
@@ -102,7 +102,7 @@
                     }
                 });
         }
-        RoleMap().then(GetRoomList);
-        $("#RefreshRommList").click(GetRoomList);
+        CardMap().then(RoomList);
+        $("#RefreshRommList").click(RoomList);
     });</script>
 }

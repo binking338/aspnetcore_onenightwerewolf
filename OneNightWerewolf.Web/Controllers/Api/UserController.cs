@@ -15,21 +15,10 @@ namespace OneNightWerewolf.Web.Controllers.Api
     [ApiController]
     public class UserController : ControllerBase
     {
-        UserProvider userProvider;
-        public UserController(UserProvider userProvider)
+        UserRepository userRepository;
+        public UserController(UserRepository userRepository)
         {
-            this.userProvider = userProvider;
-        }
-
-        private string GetClientId()
-        {
-            var sessionId = HttpContext.Session.Id;
-            return sessionId;
-        }
-
-        private string GetUserId()
-        {
-            return HttpContext.User.Identity.Name;
+            this.userRepository = userRepository;
         }
 
         [HttpPost]
@@ -41,10 +30,11 @@ namespace OneNightWerewolf.Web.Controllers.Api
                 return Response<bool>.Error(-1, "用户名和密码不能超过20个字符！");
             }
             var userId = nick;
-            User user = userProvider.Get(userId);
-            if (userProvider.Get(userId) != null)
+            var clientId = HttpContext.Session.Id; 
+            User user = userRepository.Get(userId);
+            if (user != null)
             {
-                if (user.ClientId != GetClientId() && user.Password != password)
+                if (user.ClientId != clientId && user.Password != password)
                 {
                     return Response<bool>.Error(-2, "密码不正确！");
                 }
@@ -63,12 +53,10 @@ namespace OneNightWerewolf.Web.Controllers.Api
             {
                 Id = userId,
                 Password = password,
-                ClientId = GetClientId(),
+                ClientId = clientId,
                 Nick = nick
             };
-            userProvider.Set(user);
-            HttpContext.Session.Set("user", System.Text.Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(user)));
-
+            userRepository.Set(user);
             return Response<bool>.Return(true);
         }
 
@@ -82,7 +70,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
         [HttpGet]
         public Response<User> Info()
         {
-            var user = userProvider.Get(GetUserId());
+            var user = userRepository.Get(Models.User.GetUserId(HttpContext));
             return Response<User>.Return(user);
         }
     }

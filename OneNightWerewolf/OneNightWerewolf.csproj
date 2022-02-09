@@ -1,7 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\net5.0\OneNightWerewolf.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneNightWerewolf.Core\OneNightWerewolf.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Insomniac\" />
+    <None Remove="VillageCard\" />
+    <None Remove="Tanner\" />
+    <None Remove="Common\" />
+    <None Remove="Werewolf\" />
+    <None Remove="Minion\" />
+    <None Remove="Masons\" />
+    <None Remove="Seer\" />
+    <None Remove="Robber\" />
+    <None Remove="Troublemaker\" />
+    <None Remove="Drunk\" />
+    <None Remove="Hunter\" />
+    <None Remove="Doppelganger\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Insomniac\" />
+    <Folder Include="Village\" />
+    <Folder Include="Tanner\" />
+    <Folder Include="Common\" />
+    <Folder Include="Werewolf\" />
+    <Folder Include="Minion\" />
+    <Folder Include="Mason\" />
+    <Folder Include="Seer\" />
+    <Folder Include="Robber\" />
+    <Folder Include="Troublemaker\" />
+    <Folder Include="Drunk\" />
+    <Folder Include="Hunter\" />
+    <Folder Include="Doppelganger\" />
+  </ItemGroup>
 </Project>
