@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  onenightwerewolf.web:
+    image: ${DOCKER_REGISTRY-}onenightwerewolf
+    build:
+      context: .
+      dockerfile: OneNightWerewolf.Web/Dockerfile
