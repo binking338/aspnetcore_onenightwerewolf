@@ -185,7 +185,7 @@ namespace OneNightWerewolf.Common
 
         public void Handle(Table table, Seat seat, Choice choice)
         {
-            seat.CountTickets(table);
+            seat.SeeDeath(table);
         }
     }
 
@@ -210,7 +210,7 @@ namespace OneNightWerewolf.Common
 
         public void Handle(Table table, Seat seat, Choice choice)
         {
-            seat.Judge(table);
+            seat.JudgeWinning(table);
         }
     }
 

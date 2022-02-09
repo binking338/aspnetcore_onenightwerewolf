@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace OneNightWerewolf.Core
 {
-    // todo 操作全部改用 seat.no
     // todo 胜负阵营判定抽象出来 WinningCampJudgeRule 判定上下文 table
     // todo 卡牌胜负判定规则抽象出来 WinnerJudgeRule 判定上下文 table seat.no
     public class Table
@@ -14,11 +13,11 @@ namespace OneNightWerewolf.Core
             Game = game;
         }
 
-        public Seat[] Seats { get; private set; }
+        public Game Game { get; private set; }
 
         public Grave[] Graves { get; private set; }
 
-        public Game Game { get; private set; }
+        public Seat[] Seats { get; private set; }
 
         public DateTime? StartTime { get; private set; }
 
@@ -36,7 +35,9 @@ namespace OneNightWerewolf.Core
 
         public IMonitor Monitor { get; set; } = new HtmlMonitor();
 
-        public Camp? WinCamp { get; private set; }
+        public Camp? WinningCamp { get; private set; }
+
+        #region Game
 
         public void Config(int seats, int graves)
         {
@@ -52,8 +53,6 @@ namespace OneNightWerewolf.Core
             }
         }
 
-        #region Game
-
         public bool NewGame()
         {
             RoundIndex = -1;
@@ -66,7 +65,7 @@ namespace OneNightWerewolf.Core
             Replay.Histories.Clear();
 
             Monitor.Clear();
-            WinCamp = null;
+            WinningCamp = null;
 
             return true;
         }
@@ -74,6 +73,45 @@ namespace OneNightWerewolf.Core
         public bool IsGameFinished()
         {
             return Round == null || IsLastRound();
+        }
+
+        public void Recycle()
+        {
+            foreach (var seat in Seats)
+            {
+                (seat as ICardPlace).RecycleCard();
+            }
+        }
+
+        public void Deal(ICard[] cards)
+        {
+            if (cards.Length != Seats.Length + Graves.Length)
+            {
+                throw new ArgumentException("牌不够");
+            }
+            var i = 0;
+            foreach (var seat in Seats)
+            {
+                (seat as ICardPlace).PutCard(cards[i++]);
+            }
+            foreach (var grave in Graves)
+            {
+                (grave as ICardPlace).PutCard(cards[i++]);
+            }
+        }
+
+        public void Tickets()
+        {
+            if (this.Seats.All(s => s.TicketsReceived == 1))
+            {
+                // no one die
+            }
+            else
+            {
+                var max = this.Seats.Select(s => s.TicketsReceived).Max();
+                this.Seats.Where(s => s.TicketsReceived == max).ToList()
+                    .ForEach(s => s.Die());
+            }
         }
 
         public void NextRound()
@@ -129,55 +167,6 @@ namespace OneNightWerewolf.Core
 
         #region Player
 
-        public IDictionary<string, Choice> GetChoices(string player)
-        {
-            var seat = FindSeat(player);
-            var choices = new Dictionary<string, Choice>();
-            var ability = GetAbility(player);
-            if (ability == null) return null;
-            foreach (var option in ability.Options)
-            {
-                foreach (var choice in option.GenerateChoices(seat, this))
-                {
-                    choices.Add(choice.Key, choice.Value);
-                }
-            }
-            return choices;
-        }
-
-        public bool IsChoiceMaked(string player)
-        {
-            if (PlayerChoices.ContainsKey(player))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public bool MakeChoice(string player, Choice choice)
-        {
-            if (IsChoiceMaked(player))
-            {
-                return false;
-            }
-            PlayerChoices.Add(player, choice);
-            var ability = GetAbility(player);
-            var option = ability.Options?.FirstOrDefault(option => option.Name == choice.Data["Option"]);
-            var actions = option == null ? new Action[] { Action.None } : option.Actions;
-            if(Game.ActionHandlers != null)
-            {
-                var seat = FindSeat(player);
-                foreach (var action in actions)
-                {
-                    foreach (var actionHandler in Game.ActionHandlers)
-                    {
-                        if(action == actionHandler.Action)actionHandler.Handle(this, seat, choice);
-                    }
-                }
-            }
-            return true;
-        }
-
         public bool IsAllSeatTaken()
         {
             if (Seats == null) return false;
@@ -197,9 +186,9 @@ namespace OneNightWerewolf.Core
             {
                 return false;
             }
-            foreach(var seat in Seats)
+            foreach (var seat in Seats)
             {
-                if(string.IsNullOrWhiteSpace(seat.Player))
+                if (string.IsNullOrWhiteSpace(seat.Player))
                 {
                     seat.TakeBy(player);
                     return true;
@@ -212,6 +201,59 @@ namespace OneNightWerewolf.Core
         {
             var seat = FindSeat(player);
             seat.TakeOff();
+        }
+
+        #endregion
+
+        #region Card Oprations
+
+        public IDictionary<string, Choice> GetChoices(string player)
+        {
+            var seat = FindSeat(player);
+            var choices = new Dictionary<string, Choice>();
+            var ability = GetAbility(player);
+            if (ability == null) return null;
+            foreach (var option in ability.Options)
+            {
+                foreach (var choice in option.GenerateChoices(seat, this))
+                {
+                    choices.Add(choice.Key, choice.Value);
+                }
+            }
+            return choices;
+        }
+
+        public bool IsChoiceMade(string player)
+        {
+            if (PlayerChoices.ContainsKey(player))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool MakeChoice(string player, Choice choice)
+        {
+            if (IsChoiceMade(player))
+            {
+                return false;
+            }
+            PlayerChoices.Add(player, choice);
+            var ability = GetAbility(player);
+            var option = ability.Options?.FirstOrDefault(option => option.Name == choice.Data["Option"]);
+            var actions = option == null ? new Action[] { Action.None } : option.Actions;
+            if (Game.ActionHandlers != null)
+            {
+                var seat = FindSeat(player);
+                foreach (var action in actions)
+                {
+                    foreach (var actionHandler in Game.ActionHandlers)
+                    {
+                        if (action == actionHandler.Action) actionHandler.Handle(this, seat, choice);
+                    }
+                }
+            }
+            return true;
         }
 
         private IAbility GetAbility(string player)
@@ -229,39 +271,30 @@ namespace OneNightWerewolf.Core
             return new NoneAbility();
         }
 
-        #endregion
-
-        #region Card
-
-        public void Recycle()
-        {
-            foreach (var seat in Seats)
-            {
-                (seat as ICardPlace).RecycleCard();
-            }
-        }
-
-        public void Deal(ICard[] cards)
-        {
-            if(cards.Length != Seats.Length + Graves.Length)
-            {
-                throw new ArgumentException("牌不够");
-            }
-            var i = 0;
-            foreach (var seat in Seats)
-            {
-                (seat as ICardPlace).PutCard(cards[i++]);
-            }
-            foreach(var grave in Graves)
-            {
-                (grave as ICardPlace).PutCard(cards[i++]);
-            }
-        }
-
         public void FindRole(string player, Role role, string roleName)
         {
-            var self = FindSeat(player);
-            self.FindRole(Seats, role, roleName);
+            var seat = FindSeat(player);
+
+            List<Seat> roleSeats = new List<Seat>();
+            foreach (var s in Seats)
+            {
+                if (s.No == seat.No)
+                {
+                    continue;
+                }
+                if (s.OriginCard.Role == role)
+                {
+                    roleSeats.Add(s);
+                }
+            }
+            if (roleSeats.Count == 0)
+            {
+                seat.Monitor.Print(string.Format(Constants.MONITOR_NONE_PLAYER, roleName));
+            }
+            else
+            {
+                seat.Monitor.Print(string.Format(Constants.MONITOR_FIND_ROLE_PLAYER, roleName, string.Join(",", roleSeats.Select(w => w.Player))));
+            }
         }
 
         public void SeeMyCard(string player)
@@ -331,20 +364,6 @@ namespace OneNightWerewolf.Core
             seat.Vote(votedSeat);
         }
 
-        public void Tickets()
-        {
-            if(this.Seats.All(s => s.Tickets == 1))
-            {
-                // no one die
-            }
-            else
-            {
-                var max = this.Seats.Select(s => s.Tickets).Max();
-                this.Seats.Where(s => s.Tickets == max).ToList()
-                    .ForEach(s => s.Die());
-            }
-        }
-
         public void Hunt(string hunter, string beHuntedPlayer)
         {
             var votedSeat = FindSeat(beHuntedPlayer);
@@ -352,9 +371,9 @@ namespace OneNightWerewolf.Core
             Monitor.Print(string.Format(Constants.MONITOR_HUNT, hunter, beHuntedPlayer));
         }
 
-        public void Judge()
+        public void JudgeWinningCamp()
         {
-            if (WinCamp != null) return;
+            if (WinningCamp != null) return;
             var deaths = this.Seats.Where(s => s.Dead);
             var hasWerewolf = this.Seats.Any(s => s.FinalCard.Role == Role.Werewolf);
             var hasMinion = this.Seats.Any(s => s.FinalCard.Role == Role.Minion);
@@ -362,7 +381,7 @@ namespace OneNightWerewolf.Core
             if (deaths.Count() > 0 && deaths.All(s => s.FinalCard.Role == Role.Tanner))
             {
                 // 只死了皮匠
-                WinCamp = Camp.None;
+                WinningCamp = Camp.None;
                 return;
             }
             else if (hasWerewolf)
@@ -371,12 +390,12 @@ namespace OneNightWerewolf.Core
                 if (deaths.Any(s => s.FinalCard.Role == Role.Werewolf))
                 {
                     // 村民赢
-                    WinCamp = Camp.Villiage;
+                    WinningCamp = Camp.Villiage;
                 }
                 else
                 {
                     // 狼人赢
-                    WinCamp = Camp.Werewolf;
+                    WinningCamp = Camp.Werewolf;
                 }
             }
             else if(hasMinion)
@@ -385,28 +404,28 @@ namespace OneNightWerewolf.Core
                 if (deaths.Any(s => s.FinalCard.Role == Role.Minion) && !deaths.Any(s => s.FinalCard.Role != Role.Minion && s.FinalCard.Role != Role.Tanner))
                 {
                     // 村民赢
-                    WinCamp = Camp.Villiage;
+                    WinningCamp = Camp.Villiage;
                 }
                 else if(!deaths.Any(s => s.FinalCard.Role == Role.Minion) && deaths.Any(s => s.FinalCard.Role != Role.Minion && s.FinalCard.Role != Role.Tanner))
                 {
                     // 狼人赢
-                    WinCamp = Camp.Werewolf;
+                    WinningCamp = Camp.Werewolf;
                 }
                 else
                 {
                     // 没有阵营赢
-                    WinCamp = Camp.None;
+                    WinningCamp = Camp.None;
                 }
             }
             else if(deaths.Count() == 0)
             {
-                WinCamp = Camp.Villiage;
+                WinningCamp = Camp.Villiage;
             }
             else
             {
-                WinCamp = Camp.None;
+                WinningCamp = Camp.None;
             }
-            switch (WinCamp)
+            switch (WinningCamp)
             {
                 case Camp.None:
                     Monitor.Print(Constants.MONITOR_WINNING_CAMP_NONE);

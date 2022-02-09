@@ -16,11 +16,11 @@ namespace OneNightWerewolf.Core
 
         public string Player { get; private set; }
 
-        public IMonitor Monitor { get; private set; }
+        public IMonitor Monitor { get; set; }
 
-        public Seat SeatVoted { get; private set; }
+        public Seat TicketVotedFor { get; private set; }
 
-        public int Tickets { get; private set; }
+        public int TicketsReceived { get; private set; }
 
         public bool Dead { get; private set; }
 
@@ -35,9 +35,19 @@ namespace OneNightWerewolf.Core
             (this as ICardPlace).OriginCard = null;
             (this as ICardPlace).FinalCard = null;
             Monitor.Clear();
-            SeatVoted = null;
-            Tickets = 0;
+            TicketVotedFor = null;
+            TicketsReceived = 0;
             Dead = false;
+        }
+
+        public void TakeBy(string player)
+        {
+            Player = player;
+        }
+
+        public void TakeOff()
+        {
+            Player = string.Empty;
         }
 
         public void SeeCard(IMonitor monitor)
@@ -52,20 +62,23 @@ namespace OneNightWerewolf.Core
             }
         }
 
-        public void TakeBy(string player)
+        public void SeeDeath(Table table)
         {
-            Player = player;
-        }
-
-        public void TakeOff()
-        {
-            Player = string.Empty;
+            table.Tickets();
+            if (Dead)
+            {
+                Monitor.Print(string.Format(Constants.MONITOR_DEAD, this.FinalCard.Name, this.TicketsReceived));
+            }
+            else
+            {
+                Monitor.Print(string.Format(Constants.MONITOR_SURVIVOR, this.FinalCard.Name, this.TicketsReceived));
+            }
         }
 
         public void Vote(Seat seat)
         {
-            SeatVoted = seat;
-            seat.Tickets++;
+            TicketVotedFor = seat;
+            seat.TicketsReceived++;
         }
 
         public void Die()
@@ -73,46 +86,9 @@ namespace OneNightWerewolf.Core
             Dead = true;
         }
 
-        public void FindRole(IList<Seat> seats, Role role, string roleName)
+        public void JudgeWinning(Table table)
         {
-            List<Seat> werewolfs = new List<Seat>();
-            foreach (var seat in seats)
-            {
-                if (seat.No == this.No)
-                {
-                    continue;
-                }
-                if (seat.OriginCard.Role == role)
-                {
-                    werewolfs.Add(seat);
-                }
-            }
-            if (werewolfs.Count == 0)
-            {
-                this.Monitor.Print(string.Format(Constants.MONITOR_NONE_PLAYER, roleName));
-            }
-            else
-            {
-                this.Monitor.Print(string.Format(Constants.MONITOR_FIND_ROLE_PLAYER, roleName, string.Join(",", werewolfs.Select(w => w.Player))));
-            }
-        }
-
-        public void CountTickets(Table table)
-        {
-            table.Tickets();
-            if (Dead)
-            {
-                Monitor.Print(string.Format(Constants.MONITOR_DEAD, this.FinalCard.Name,this.Tickets));
-            }
-            else
-            {
-                Monitor.Print(string.Format(Constants.MONITOR_SURVIVOR, this.FinalCard.Name, this.Tickets));
-            }
-        }
-
-        public void Judge(Table table)
-        {
-            table.Judge();
+            table.JudgeWinningCamp();
             switch (this.FinalCard.Role)
             {
                 case Role.Tanner:
@@ -120,10 +96,10 @@ namespace OneNightWerewolf.Core
                     break;
                 case Role.Werewolf:
                 case Role.Minion:
-                    this.Win = table.WinCamp == Camp.Werewolf;
+                    this.Win = table.WinningCamp == Camp.Werewolf;
                     break;
                 default:
-                    this.Win = table.WinCamp == Camp.Villiage;
+                    this.Win = table.WinningCamp == Camp.Villiage;
                     break;
             }
             if (Win)
@@ -134,11 +110,6 @@ namespace OneNightWerewolf.Core
             {
                 Monitor.Print(Constants.MONITOR_LOSER);
             }
-        }
-
-        public void Set(IMonitor monitor)
-        {
-            Monitor = monitor;
         }
     }
 }

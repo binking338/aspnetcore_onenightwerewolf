@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneNightWerewolf.Web", "One
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneNightWerewolf.Console", "OneNightWerewolf.Console\OneNightWerewolf.Console.csproj", "{A6C41BFA-DB6D-4ECC-93EC-66A22A83745B}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{89506DDC-D435-4367-A35D-8E0E6F75AE42}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{A6C41BFA-DB6D-4ECC-93EC-66A22A83745B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6C41BFA-DB6D-4ECC-93EC-66A22A83745B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6C41BFA-DB6D-4ECC-93EC-66A22A83745B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89506DDC-D435-4367-A35D-8E0E6F75AE42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89506DDC-D435-4367-A35D-8E0E6F75AE42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89506DDC-D435-4367-A35D-8E0E6F75AE42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89506DDC-D435-4367-A35D-8E0E6F75AE42}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

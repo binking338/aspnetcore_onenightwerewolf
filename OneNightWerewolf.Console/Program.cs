@@ -30,7 +30,7 @@ namespace OneNightWerewolf.Console
             room.Table.Monitor = new ConsoleMonitor("public");
             for (var i = 0; i < room.PlayerLimit; i++)
             {
-                room.Table.Seats[i].Set(new ConsoleMonitor(users[i].Nick));
+                room.Table.Seats[i].Monitor = new ConsoleMonitor(users[i].Nick);
             }
 
             for(var t =0; t < 100; t++)
