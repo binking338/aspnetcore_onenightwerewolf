@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace OneNightWerewolf.Core
 {
-    // todo 胜负阵营判定抽象出来 WinningCampJudgeRule 判定上下文 table
-    // todo 卡牌胜负判定规则抽象出来 WinnerJudgeRule 判定上下文 table seat.no
     public class Table
     {
         public Table(Game game)
@@ -111,6 +109,24 @@ namespace OneNightWerewolf.Core
                 var max = this.Seats.Select(s => s.TicketsReceived).Max();
                 this.Seats.Where(s => s.TicketsReceived == max).ToList()
                     .ForEach(s => s.Die());
+            }
+        }
+
+        public void JudgeWinningCamp()
+        {
+            if (WinningCamp != null) return;
+            WinningCamp = Game.WinningCampDecisionRule.Judge(this);
+            switch (WinningCamp)
+            {
+                case Camp.None:
+                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_NONE);
+                    break;
+                case Camp.Villiage:
+                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_VILLIAGE);
+                    break;
+                case Camp.Werewolf:
+                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_WEREWOLF);
+                    break;
             }
         }
 
@@ -369,74 +385,6 @@ namespace OneNightWerewolf.Core
             var votedSeat = FindSeat(beHuntedPlayer);
             votedSeat.Die();
             Monitor.Print(string.Format(Constants.MONITOR_HUNT, hunter, beHuntedPlayer));
-        }
-
-        public void JudgeWinningCamp()
-        {
-            if (WinningCamp != null) return;
-            var deaths = this.Seats.Where(s => s.Dead);
-            var hasWerewolf = this.Seats.Any(s => s.FinalCard.Role == Role.Werewolf);
-            var hasMinion = this.Seats.Any(s => s.FinalCard.Role == Role.Minion);
-            
-            if (deaths.Count() > 0 && deaths.All(s => s.FinalCard.Role == Role.Tanner))
-            {
-                // 只死了皮匠
-                WinningCamp = Camp.None;
-                return;
-            }
-            else if (hasWerewolf)
-            {
-                // 有狼人，死任一狼人
-                if (deaths.Any(s => s.FinalCard.Role == Role.Werewolf))
-                {
-                    // 村民赢
-                    WinningCamp = Camp.Villiage;
-                }
-                else
-                {
-                    // 狼人赢
-                    WinningCamp = Camp.Werewolf;
-                }
-            }
-            else if(hasMinion)
-            {
-                // 没狼人 有爪牙
-                if (deaths.Any(s => s.FinalCard.Role == Role.Minion) && !deaths.Any(s => s.FinalCard.Role != Role.Minion && s.FinalCard.Role != Role.Tanner))
-                {
-                    // 村民赢
-                    WinningCamp = Camp.Villiage;
-                }
-                else if(!deaths.Any(s => s.FinalCard.Role == Role.Minion) && deaths.Any(s => s.FinalCard.Role != Role.Minion && s.FinalCard.Role != Role.Tanner))
-                {
-                    // 狼人赢
-                    WinningCamp = Camp.Werewolf;
-                }
-                else
-                {
-                    // 没有阵营赢
-                    WinningCamp = Camp.None;
-                }
-            }
-            else if(deaths.Count() == 0)
-            {
-                WinningCamp = Camp.Villiage;
-            }
-            else
-            {
-                WinningCamp = Camp.None;
-            }
-            switch (WinningCamp)
-            {
-                case Camp.None:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_NONE);
-                    break;
-                case Camp.Villiage:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_VILLIAGE);
-                    break;
-                case Camp.Werewolf:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_WEREWOLF);
-                    break;
-            }
         }
 
         public Seat FindSeat(string player)

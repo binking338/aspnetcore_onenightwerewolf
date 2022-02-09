@@ -11,7 +11,7 @@ namespace OneNightWerewolf.Console
         static Random random = new Random((int)(DateTime.Now.Ticks % int.MaxValue));
         static void Main(string[] args)
         {
-            Room room = new Room("test001", Rounds.AllBasics, ActionHandlers.All);
+            Room room = new Room("test001", Rounds.AllBasics, ActionHandlers.All, new DefaultWinningCampDecisionRule());
             room.Config(Cards.CreateCards("01,01,01,02,02,03,04,04,05,06,07,08,09,10,11,12"));
 
             List<Player> users = new List<Player>();

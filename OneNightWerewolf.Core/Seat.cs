@@ -89,19 +89,7 @@ namespace OneNightWerewolf.Core
         public void JudgeWinning(Table table)
         {
             table.JudgeWinningCamp();
-            switch (this.FinalCard.Role)
-            {
-                case Role.Tanner:
-                    this.Win = this.Dead;
-                    break;
-                case Role.Werewolf:
-                case Role.Minion:
-                    this.Win = table.WinningCamp == Camp.Werewolf;
-                    break;
-                default:
-                    this.Win = table.WinningCamp == Camp.Villiage;
-                    break;
-            }
+            this.Win = FinalCard.JudgeWinning(table, this.No);
             if (Win)
             {
                 Monitor.Print(Constants.MONITOR_WINNER);

@@ -8,15 +8,18 @@ namespace OneNightWerewolf.Core
     {
         private readonly Random random = new Random((int)(DateTime.Now.Ticks % int.MaxValue));
 
-        public Game(IRound[] basicRounds, IActionHandler[] actionHandlers)
+        public Game(IRound[] basicRounds, IActionHandler[] actionHandlers, IWinningCampDecisionRule winningCampDecisionRule)
         {
             BasicRounds = basicRounds;
             ActionHandlers = actionHandlers;
+            WinningCampDecisionRule = winningCampDecisionRule;
         }
 
         public IActionHandler[] ActionHandlers { get; private set; }
 
         public IRound[] BasicRounds { get; private set; }
+
+        public IWinningCampDecisionRule WinningCampDecisionRule { get; private set; }
 
         public ICard[] Cards { get; private set; }
 

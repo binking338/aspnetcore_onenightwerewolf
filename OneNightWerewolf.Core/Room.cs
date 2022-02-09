@@ -6,10 +6,10 @@ namespace OneNightWerewolf.Core
 {
     public class Room
     {
-        public Room(string name, IRound[] basicRounds, IActionHandler[] actionHandlers)
+        public Room(string name, IRound[] basicRounds, IActionHandler[] actionHandlers, IWinningCampDecisionRule winningCampDecisionRule)
         {
             Name = name;
-            Game = new Game(basicRounds, actionHandlers);
+            Game = new Game(basicRounds, actionHandlers, winningCampDecisionRule);
             Table = new Table(Game);
             Players = new List<Player>();
             CreateTime = DateTime.Now;

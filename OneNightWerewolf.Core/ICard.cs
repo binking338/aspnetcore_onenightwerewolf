@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 namespace OneNightWerewolf.Core
 {
     public interface ICard
@@ -16,6 +17,25 @@ namespace OneNightWerewolf.Core
         public virtual void Reset()
         {
             ;
+        }
+
+        public virtual bool JudgeWinning(Table table, string seatNo)
+        {
+            var seat = table.Seats.FirstOrDefault(s => s.No == seatNo);
+            if(seat == null)
+            {
+                throw new ArgumentOutOfRangeException(nameof(seatNo));
+            }
+            switch (Role)
+            {
+                case Role.Tanner:
+                    return seat.Dead;
+                case Role.Werewolf:
+                case Role.Minion:
+                    return table.WinningCamp == Camp.Werewolf;
+                default:
+                    return table.WinningCamp == Camp.Villiage;
+            }
         }
     }
 }

@@ -42,7 +42,7 @@ namespace OneNightWerewolf.Web.Models
                 throw new InvalidOperationException("房间号已经被使用");
             }
 
-            Room room = new Room(roomId, Rounds.AllBasics, ActionHandlers.All);
+            Room room = new Room(roomId, Rounds.AllBasics, ActionHandlers.All, new DefaultWinningCampDecisionRule());
             room.Config(Cards.CreateCards(cardNos));
             roomStorage[roomId] = room;
             return room;
