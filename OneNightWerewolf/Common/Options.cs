@@ -16,7 +16,7 @@ namespace OneNightWerewolf.Common
             var choices = new Dictionary<string, Choice>();
             choices[Name] = new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
-                { "SeeMyCard", seat.Player }
+                { "SeeMyCard", seat.No }
             });
             return choices;
         }
@@ -36,7 +36,7 @@ namespace OneNightWerewolf.Common
                 if (s.No == seat.No) continue;
                 choices.Add($"{s.Player}", new Choice(table.Round.Phase, table.Round.Name, $"{s.Player}", new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
-                    { "Vote", s.Player }
+                    { "Vote", s.No }
                 }));
             }
             return choices;
@@ -54,7 +54,7 @@ namespace OneNightWerewolf.Common
             var choices = new Dictionary<string, Choice>();
             choices.Add(Name, new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
-                { "Tickets", "" }
+                { "Tickets", $"{seat.No}" }
             }));
             return choices;
         }
@@ -71,7 +71,7 @@ namespace OneNightWerewolf.Common
             var choices = new Dictionary<string, Choice>();
             choices.Add(Name, new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
-                { "Judge", string.Empty }
+                { "Judge",  $"{seat.No}" }
             }));
             return choices;
         }
@@ -88,7 +88,7 @@ namespace OneNightWerewolf.Common
             var choices = new Dictionary<string, Choice>();
             choices.Add(Name, new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
-                { "Ready", seat.Player }
+                { "Ready", seat.No }
             }));
             return choices;
         }

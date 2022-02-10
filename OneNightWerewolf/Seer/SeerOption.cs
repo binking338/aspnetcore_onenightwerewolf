@@ -18,7 +18,7 @@ namespace OneNightWerewolf.Seer
                 if (seat.No == table.Seats[i].No) continue;
                 choices.Add($"{table.Seats[i].Player}", new Choice(table.Round.Phase, table.Round.Name, $"{table.Seats[i].Player}", new Dictionary<string, string>() {
                         { "Option", $"{Name}"},
-                        { "SeeOthersCard", $"{table.Seats[i].Player}"}
+                        { "SeeOthersCard", $"{table.Seats[i].No}"}
                     }));
             }
             return choices;

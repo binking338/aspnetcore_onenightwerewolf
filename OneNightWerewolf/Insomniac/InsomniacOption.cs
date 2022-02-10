@@ -16,7 +16,7 @@ namespace OneNightWerewolf.Insomniac
             var choices = new Dictionary<string, Choice>();
             choices.Add(Name, new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
-                { "SeeMyCard", seat.Player }
+                { "SeeMyCard", seat.No }
             }));
             return choices;
         }

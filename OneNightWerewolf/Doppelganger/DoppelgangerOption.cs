@@ -18,8 +18,8 @@ namespace OneNightWerewolf.Doppelganger
                 if (s.No == seat.No) continue;
                 choices.Add($"{s.Player}", new Choice(table.Round.Phase, table.Round.Name, $"{s.Player}", new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
-                    { "SeeOthersCard", $"{s.Player}" },
-                    { "CopyOthersCard", $"{s.Player}" }
+                    { "SeeOthersCard", $"{s.No}" },
+                    { "CopyOthersCard", $"{s.No}" }
                 }));
             }
             return choices;

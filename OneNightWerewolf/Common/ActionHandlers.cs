@@ -27,7 +27,6 @@ namespace OneNightWerewolf.Common
                     new TicketsActionHandler(),
                     new HuntActionHandler(),
                     new JudgeActionHandler(),
-                    new LeaveActionHandler(),
                     new ReadyActionHandler(),
                 };
             }
@@ -64,7 +63,7 @@ namespace OneNightWerewolf.Common
                         roleName = "守夜人";
                         break;
                 }
-                table.FindRole(seat.Player, role, roleName);
+                table.FindRole(seat.No, role, roleName);
             }
         }
     }
@@ -76,10 +75,10 @@ namespace OneNightWerewolf.Common
         public void Handle(Table table, Seat seat, Choice choice)
         {
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
-            var graves = choice.Data["SeeGraveCard"].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            foreach (var grave in graves)
+            var targetGraveNos = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            foreach (var targetGraveNo in targetGraveNos)
             {
-                table.SeeCardInGrave(seat.Player, grave);
+                table.SeeCardInGrave(seat.No, targetGraveNo);
             }
         }
     }
@@ -91,10 +90,10 @@ namespace OneNightWerewolf.Common
         public void Handle(Table table, Seat seat, Choice choice)
         {
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
-            var players = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            foreach (var player in players)
+            var targetSeatNos = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            foreach (var targetSeatNo in targetSeatNos)
             {
-                table.SeeCardInSeat(player, seat.Player);
+                table.SeeCardInSeat(seat.No, targetSeatNo);
             }
         }
     }
@@ -105,7 +104,7 @@ namespace OneNightWerewolf.Common
 
         public void Handle(Table table, Seat seat, Choice choice)
         {
-            table.SeeMyCard(seat.Player);
+            table.SeeMyCard(seat.No);
         }
     }
 
@@ -116,9 +115,8 @@ namespace OneNightWerewolf.Common
         public void Handle(Table table, Seat seat, Choice choice)
         {
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
-            var players = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-            table.SwapCardsBetweenSeats(players[0], players[0], players[1]);
+            var targetSeatNos = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            table.SwapCardsBetweenSeats(seat.No, targetSeatNos[0], targetSeatNos[1]);
         }
     }
 
@@ -129,9 +127,8 @@ namespace OneNightWerewolf.Common
         public void Handle(Table table, Seat seat, Choice choice)
         {
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
-            var player = choice.Data[Action.ToString()];
-
-            table.SwapCardsBetweenSeats(seat.Player, seat.Player, player);
+            var targetSeatNo = choice.Data[Action.ToString()];
+            table.SwapCardsBetweenSeats(seat.No, seat.No, targetSeatNo);
         }
     }
 
@@ -142,9 +139,8 @@ namespace OneNightWerewolf.Common
         public void Handle(Table table, Seat seat, Choice choice)
         {
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
-            var player = choice.Data[Action.ToString()];
-
-            table.SwapCardsBetweenSeatAndGrave(seat.Player, seat.Player, player);
+            var targetGraveNo = choice.Data[Action.ToString()];
+            table.SwapCardsBetweenSeatAndGrave(seat.No, seat.No, targetGraveNo);
         }
     }
 
@@ -155,8 +151,8 @@ namespace OneNightWerewolf.Common
         public void Handle(Table table, Seat seat, Choice choice)
         {
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
-            var player = choice.Data[Action.ToString()];
-            var copyFromSeat = table.FindSeat(player);
+            var copyFromSeatNo = choice.Data[Action.ToString()];
+            var copyFromSeat = table.FindSeat(copyFromSeatNo);
             if(seat.OriginCard is DoppelgangerCard doppelgangerCard)
             {
                 doppelgangerCard.Copy(copyFromSeat.FinalCard);
@@ -171,10 +167,10 @@ namespace OneNightWerewolf.Common
         public void Handle(Table table, Seat seat, Choice choice)
         {
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
-            var players = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            foreach (var player in players)
+            var targetSeatNos = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            foreach (var targetSeatNo in targetSeatNos)
             {
-                table.Vote(seat.Player, player);
+                table.Vote(seat.No, targetSeatNo);
             }
         }
     }
@@ -185,7 +181,7 @@ namespace OneNightWerewolf.Common
 
         public void Handle(Table table, Seat seat, Choice choice)
         {
-            seat.SeeDeath(table);
+            table.SeeDeath(seat.No);
         }
     }
 
@@ -196,10 +192,10 @@ namespace OneNightWerewolf.Common
         public void Handle(Table table, Seat seat, Choice choice)
         {
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
-            var players = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            foreach (var player in players)
+            var targetSeatNos = choice.Data[Action.ToString()].Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            foreach (var targetSeatNo in targetSeatNos)
             {
-                table.Hunt(seat.Player, player);
+                table.Hunt(seat.No, targetSeatNo);
             }
         }
     }
@@ -210,17 +206,7 @@ namespace OneNightWerewolf.Common
 
         public void Handle(Table table, Seat seat, Choice choice)
         {
-            seat.JudgeWinning(table);
-        }
-    }
-
-    public class LeaveActionHandler : IActionHandler
-    {
-        public Action Action => Action.Leave;
-
-        public void Handle(Table table, Seat seat, Choice choice)
-        {
-            table.Disseat(seat.Player);
+            table.JudgeWinning(seat.No);
         }
     }
 

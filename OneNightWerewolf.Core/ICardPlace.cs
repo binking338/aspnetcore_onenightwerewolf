@@ -7,8 +7,6 @@ namespace OneNightWerewolf.Core
 
         public ICard FinalCard { get; set; }
 
-        public void SeeCard(IMonitor monitor);
-
         public virtual void SwapCardWith(ICardPlace cardPlace)
         {
             var card = FinalCard;

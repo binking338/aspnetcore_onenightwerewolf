@@ -83,6 +83,16 @@ namespace OneNightWerewolf.Core
             return false;
         }
 
+        public Player FindPlayer(string playerId)
+        {
+            return Players.FirstOrDefault(p => p.Id == playerId);
+        }
+
+        public Player FindPlayerByNick(string nick)
+        {
+            return Players.FirstOrDefault(p => p.Nick == nick);
+        }
+
         public bool Start()
         {
             if (!Table.IsAllSeatTaken())
@@ -100,21 +110,6 @@ namespace OneNightWerewolf.Core
             return true;
         }
 
-        public void Action(Player player, Choice choice)
-        {
-            if(!Table.MakeChoice(player.Nick, choice))
-            {
-                throw new InvalidOperationException("不能重复选择操作选项");
-            }
-            PollingCheck();
-        }
-
-        public IDictionary<string, Choice> Choices(Player player)
-        {
-            var choices = Table.GetChoices(player.Nick);
-            return choices;
-        }
-
         public void ForceStop()
         {
             Table.NewGame();
@@ -127,6 +122,21 @@ namespace OneNightWerewolf.Core
             {
                 Table.NextRound();
             }
+        }
+
+        public void Action(Player player, Choice choice)
+        {
+            if(!Table.MakeChoice(Table.FindSeatByNick(player.Nick).No, choice))
+            {
+                throw new InvalidOperationException("不能重复选择操作选项");
+            }
+            PollingCheck();
+        }
+
+        public IDictionary<string, Choice> Choices(Player player)
+        {
+            var choices = Table.GetChoices(Table.FindSeatByNick(player.Nick).No);
+            return choices;
         }
 
     }

@@ -365,11 +365,12 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<ChoicesInfo>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            var player = room.Players.FirstOrDefault(p => p.Id == user.Id);
+            var player = room.FindPlayer(user.Id);
             if (player == null)
                 return Response<ChoicesInfo>.Error(8, $"不在房间[{user.RoomId}]中");
             // 是否已行动（做了决定）
-            var choiceMaded = room.Table.PlayerChoices.ContainsKey(player.Nick);
+            var seat = room.Table.FindSeatByNick(user.Nick);
+            var choiceMaded = room.Table.SeatChoices.ContainsKey(seat.No);
             var choices = choiceMaded ? null : room.Choices(player);
             ChoicesInfo result = ToChoicesInfo(room, choices?.Keys.ToArray());
             return Response<ChoicesInfo>.Return(result);
@@ -394,7 +395,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
 
             var messages = new List<MessageInfo>();
             messages.AddRange(room.Table.Monitor.Display().Select(msg => ToMessageInfo("GM", msg)));
-            messages.AddRange(room.Table.FindSeat(player.Nick).Monitor.Display().Select(msg => ToMessageInfo("", msg)));
+            messages.AddRange(room.Table.FindSeatByNick(player.Nick).Monitor.Display().Select(msg => ToMessageInfo("", msg)));
             messages = messages.OrderBy(m => m.Time).ToList();
 
             return Response<List<MessageInfo>>.Return(messages);
@@ -466,14 +467,15 @@ namespace OneNightWerewolf.Web.Controllers.Api
 
         private RoundInfo ToRoundInfo(Room room)
         {
-            var roundInfo = new RoundInfo();
-            if (room?.Table?.Round != null)
-            {
-                roundInfo.Index = room.Table.RoundIndex;
-                roundInfo.Phase = room.Table.Round.Phase;
-                roundInfo.PhaseName = roundInfo.Phase.Readable();
-                roundInfo.Name = room.Table.Round.Name;
-            }
+            var roundInfo = (room?.Table?.Round != null) ?
+                new RoundInfo()
+                {
+                    Index = room.Table.RoundIndex,
+                    Phase = room.Table.Round.Phase,
+                    PhaseName = room.Table.Round.Phase.Readable(),
+                    Order = room.Table.Round.Order,
+                    Name = room.Table.Round.Name
+                } : new RoundInfo();
             return roundInfo;
         }
 
@@ -482,7 +484,15 @@ namespace OneNightWerewolf.Web.Controllers.Api
             var messageInfo = new MessageInfo() {
                 Channel = channel,
                 Time = ToTimestamp(message.Time).Value,
-                Content = message.Content
+                Content = message.Content,
+                Round = new RoundInfo()
+                {
+                    Index = message.RoundIndex,
+                    Phase = message.Phase,
+                    PhaseName = message.Phase.Readable(),
+                    Order = message.RoundOrder,
+                    Name = message.RoundName
+                }
             };
             return messageInfo;
         }

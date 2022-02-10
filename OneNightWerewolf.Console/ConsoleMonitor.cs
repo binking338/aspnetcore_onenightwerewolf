@@ -23,7 +23,7 @@ namespace OneNightWerewolf.Console
             return null;
         }
 
-        public void Print(string message)
+        public void Print(string message, Table table)
         {
             System.Console.WriteLine($"{Name}: {message}");
         }

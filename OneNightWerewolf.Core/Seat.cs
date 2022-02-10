@@ -10,6 +10,7 @@ namespace OneNightWerewolf.Core
         {
             No = no;
             Monitor = new HtmlMonitor();
+            TicketsReceivedFrom = new List<Seat>();
         }
 
         public string No { get; }
@@ -19,6 +20,8 @@ namespace OneNightWerewolf.Core
         public IMonitor Monitor { get; set; }
 
         public Seat TicketVotedFor { get; private set; }
+
+        public IList<Seat> TicketsReceivedFrom { get; private set; }
 
         public int TicketsReceived { get; private set; }
 
@@ -37,6 +40,7 @@ namespace OneNightWerewolf.Core
             Monitor.Clear();
             TicketVotedFor = null;
             TicketsReceived = 0;
+            TicketsReceivedFrom.Clear();
             Dead = false;
         }
 
@@ -50,54 +54,20 @@ namespace OneNightWerewolf.Core
             Player = string.Empty;
         }
 
-        public void SeeCard(IMonitor monitor)
-        {
-            if(monitor == Monitor)
-            {
-                monitor.Print(string.Format(Constants.MONITOR_SEE_MY_CARD, Player, FinalCard.Name));
-            }
-            else
-            {
-                monitor.Print(string.Format(Constants.MONITOR_SEE_OTHERS_CARD, Player, FinalCard.Name));
-            }
-        }
-
-        public void SeeDeath(Table table)
-        {
-            table.Tickets();
-            if (Dead)
-            {
-                Monitor.Print(string.Format(Constants.MONITOR_DEAD, this.FinalCard.Name, this.TicketsReceived));
-            }
-            else
-            {
-                Monitor.Print(string.Format(Constants.MONITOR_SURVIVOR, this.FinalCard.Name, this.TicketsReceived));
-            }
-        }
-
         public void Vote(Seat seat)
         {
-            TicketVotedFor = seat;
-            seat.TicketsReceived++;
+            this.TicketVotedFor = seat;
+            seat.BeVoted(this);
+        }
+
+        public void BeVoted(Seat seat)
+        {
+            this.TicketsReceived++;
         }
 
         public void Die()
         {
             Dead = true;
-        }
-
-        public void JudgeWinning(Table table)
-        {
-            table.JudgeWinningCamp();
-            this.Win = FinalCard.JudgeWinning(table, this.No);
-            if (Win)
-            {
-                Monitor.Print(Constants.MONITOR_WINNER);
-            }
-            else
-            {
-                Monitor.Print(Constants.MONITOR_LOSER);
-            }
         }
     }
 }

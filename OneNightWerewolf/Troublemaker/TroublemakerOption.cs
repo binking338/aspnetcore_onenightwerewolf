@@ -19,7 +19,7 @@ namespace OneNightWerewolf.Troublemaker
                 {
                     choices.Add($"{table.Seats[i].Player}和{table.Seats[j].Player}", new Choice(table.Round.Phase, table.Round.Name, $"{table.Seats[i].Player}和{table.Seats[j].Player}", new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
-                        { "SwapOthers", $"{table.Seats[i].Player},{table.Seats[j].Player}"}
+                        { "SwapOthers", $"{table.Seats[i].No},{table.Seats[j].No}"}
                     }));
                 }
             }

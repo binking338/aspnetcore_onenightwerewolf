@@ -27,7 +27,7 @@ namespace OneNightWerewolf.Core
 
         public IRound Round { get; private set; } = null;
 
-        public IDictionary<string, Choice> PlayerChoices { get; } = new Dictionary<string, Choice>();
+        public IDictionary<string, Choice> SeatChoices { get; } = new Dictionary<string, Choice>();
 
         public GameReplay Replay { get; } = new GameReplay();
 
@@ -59,7 +59,7 @@ namespace OneNightWerewolf.Core
             DawnTime = null;
             OverTime = null;
 
-            PlayerChoices.Clear();
+            SeatChoices.Clear();
             Replay.Histories.Clear();
 
             Monitor.Clear();
@@ -119,13 +119,13 @@ namespace OneNightWerewolf.Core
             switch (WinningCamp)
             {
                 case Camp.None:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_NONE);
+                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_NONE, this);
                     break;
                 case Camp.Villiage:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_VILLIAGE);
+                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_VILLIAGE, this);
                     break;
                 case Camp.Werewolf:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_WEREWOLF);
+                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_WEREWOLF, this);
                     break;
             }
         }
@@ -143,8 +143,8 @@ namespace OneNightWerewolf.Core
                 return;
             }
 
-            Replay.Histories.Add(new GameRoundHistory(Round, new Dictionary<string, Choice>(PlayerChoices)));
-            PlayerChoices.Clear();
+            Replay.Histories.Add(new GameRoundHistory(Round, new Dictionary<string, Choice>(SeatChoices)));
+            SeatChoices.Clear();
             do
             {
                 RoundIndex++;
@@ -163,7 +163,7 @@ namespace OneNightWerewolf.Core
 
         public bool IsRoundFinished()
         {
-            if (PlayerChoices.Count == Seats.Length)
+            if (SeatChoices.Count == Seats.Length)
             {
                 return true;
             }
@@ -215,7 +215,7 @@ namespace OneNightWerewolf.Core
 
         public void Disseat(string player)
         {
-            var seat = FindSeat(player);
+            var seat = FindSeatByNick(player);
             seat.TakeOff();
         }
 
@@ -223,11 +223,11 @@ namespace OneNightWerewolf.Core
 
         #region Card Oprations
 
-        public IDictionary<string, Choice> GetChoices(string player)
+        public IDictionary<string, Choice> GetChoices(string seatNo)
         {
-            var seat = FindSeat(player);
+            var seat = FindSeat(seatNo);
             var choices = new Dictionary<string, Choice>();
-            var ability = GetAbility(player);
+            var ability = GetAbility(seat.No);
             if (ability == null) return null;
             foreach (var option in ability.Options)
             {
@@ -239,28 +239,28 @@ namespace OneNightWerewolf.Core
             return choices;
         }
 
-        public bool IsChoiceMade(string player)
+        public bool IsChoiceMade(string seatNo)
         {
-            if (PlayerChoices.ContainsKey(player))
+            if (SeatChoices.ContainsKey(seatNo))
             {
                 return true;
             }
             return false;
         }
 
-        public bool MakeChoice(string player, Choice choice)
+        public bool MakeChoice(string seatNo, Choice choice)
         {
-            if (IsChoiceMade(player))
+            if (IsChoiceMade(seatNo))
             {
                 return false;
             }
-            PlayerChoices.Add(player, choice);
-            var ability = GetAbility(player);
+            SeatChoices.Add(seatNo, choice);
+            var seat = FindSeat(seatNo);
+            var ability = GetAbility(seat.No);
             var option = ability.Options?.FirstOrDefault(option => option.Name == choice.Data["Option"]);
             var actions = option == null ? new Action[] { Action.None } : option.Actions;
             if (Game.ActionHandlers != null)
             {
-                var seat = FindSeat(player);
                 foreach (var action in actions)
                 {
                     foreach (var actionHandler in Game.ActionHandlers)
@@ -272,9 +272,9 @@ namespace OneNightWerewolf.Core
             return true;
         }
 
-        private IAbility GetAbility(string player)
+        private IAbility GetAbility(string seatNo)
         {
-            var seat = FindSeat(player);
+            var seat = FindSeat(seatNo);
             if (Round == null) return null;
             var card = Round.Phase > Phase.Dawn ? seat.FinalCard : seat.OriginCard;
             foreach (var ability in card.Abilities)
@@ -287,9 +287,9 @@ namespace OneNightWerewolf.Core
             return new NoneAbility();
         }
 
-        public void FindRole(string player, Role role, string roleName)
+        public void FindRole(string seatNo, Role role, string roleName)
         {
-            var seat = FindSeat(player);
+            var seat = FindSeat(seatNo);
 
             List<Seat> roleSeats = new List<Seat>();
             foreach (var s in Seats)
@@ -305,89 +305,122 @@ namespace OneNightWerewolf.Core
             }
             if (roleSeats.Count == 0)
             {
-                seat.Monitor.Print(string.Format(Constants.MONITOR_NONE_PLAYER, roleName));
+                seat.Monitor.Print(string.Format(Constants.MONITOR_NONE_PLAYER, roleName), this);
             }
             else
             {
-                seat.Monitor.Print(string.Format(Constants.MONITOR_FIND_ROLE_PLAYER, roleName, string.Join(",", roleSeats.Select(w => w.Player))));
+                seat.Monitor.Print(string.Format(Constants.MONITOR_FIND_ROLE_PLAYER, roleName, string.Join(",", roleSeats.Select(w => w.Player))), this);
             }
         }
 
-        public void SeeMyCard(string player)
+        public void SeeMyCard(string seatNo)
         {
-            var seat = FindSeat(player);
-            seat.SeeCard(seat.Monitor);
+            var seat = FindSeat(seatNo);
+
+            seat.Monitor.Print(string.Format(Constants.MONITOR_SEE_MY_CARD, seat.Player, seat.FinalCard.Name), this);
         }
 
-        public void SeeCardInSeat(string player, string targetPlayer)
+        public void SeeCardInSeat(string seatNo, string targetSeatNo)
         {
-            var seat = FindSeat(player);
-            var target = FindSeat(targetPlayer);
-            seat.SeeCard(target.Monitor);
+            var seat = FindSeat(seatNo);
+            var target = FindSeat(targetSeatNo);
+
+            seat.Monitor.Print(string.Format(Constants.MONITOR_SEE_OTHERS_CARD, target, target.FinalCard.Name), this);
         }
 
-        public void SeeCardInGrave(string player, string graveNo)
+        public void SeeCardInGrave(string seatNo, string targetGraveNo)
         {
-            var seat = FindSeat(player);
-            var grave = FindGrave(graveNo);
-            grave.SeeCard(seat.Monitor);
+            var seat = FindSeat(seatNo);
+            var grave = FindGrave(targetGraveNo);
+            seat.Monitor.Print(string.Format(Constants.MONITOR_SEE_GRAVE_CARD, grave.No, grave.FinalCard.Name), this);
         }
 
-        public void SwapCardsBetweenSeats(string player, string player1, string player2)
+        public void SwapCardsBetweenSeats(string seatNo, string targetSeatNo1, string targetSeatNo2)
         {
-            var seat = FindSeat(player);
-            var seat1 = FindSeat(player1);
-            var seat2 = FindSeat(player2);
+            var seat = FindSeat(seatNo);
+            var seat1 = FindSeat(targetSeatNo1);
+            var seat2 = FindSeat(targetSeatNo2);
             (seat1 as ICardPlace).SwapCardWith(seat2);
-            if (player == player1)
+            if (seatNo == targetSeatNo1)
             {
                 // 自己与他人交换
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_OTHERS,player2));
+                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_OTHERS, seat2.Player), this);
             }
-            else if (player == player2)
+            else if (seatNo == targetSeatNo2)
             {
                 // 自己与他人交换
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_OTHERS, player1));
+                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_OTHERS, seat1.Player), this);
             }
             else
             {
                 // 交换其他人
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_OTHERS, player1, player2));
+                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_OTHERS, seat1.Player, seat2.Player), this);
             }
         }
 
-        public void SwapCardsBetweenSeatAndGrave(string player, string player1, string graveNo)
+        public void SwapCardsBetweenSeatAndGrave(string seatNo, string targetSeatNo, string targetGraveNo)
         {
-            var seat = FindSeat(player);
-            var seat1 = FindSeat(player1);
-            var grave = FindGrave(graveNo);
+            var seat = FindSeat(seatNo);
+            var seat1 = FindSeat(targetSeatNo);
+            var grave = FindGrave(targetGraveNo);
             (seat1 as ICardPlace).SwapCardWith(grave);
-            if (player == player1)
+            if (seatNo == targetSeatNo)
             {
                 // 自己与中间牌交换
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_GRAVE, graveNo));
+                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_GRAVE, targetGraveNo), this);
             }
             else
             {
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_OHTERS_WITH_GRAVE, player1, graveNo));
+                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_OHTERS_WITH_GRAVE, seat1.No, targetGraveNo), this);
             }
         }
 
-        public void Vote(string voter, string beVotedPlayer)
+        public void Vote(string voterSeatNo, string beVotedSeatNo)
         {
-            var seat = FindSeat(voter);
-            var votedSeat = FindSeat(beVotedPlayer);
+            var seat = FindSeat(voterSeatNo);
+            var votedSeat = FindSeat(beVotedSeatNo);
             seat.Vote(votedSeat);
         }
 
-        public void Hunt(string hunter, string beHuntedPlayer)
+        public void SeeDeath(string seatNo)
         {
-            var votedSeat = FindSeat(beHuntedPlayer);
-            votedSeat.Die();
-            Monitor.Print(string.Format(Constants.MONITOR_HUNT, hunter, beHuntedPlayer));
+            this.Tickets();
+            var seat = FindSeat(seatNo);
+            if (seat.Dead)
+            {
+                seat.Monitor.Print(string.Format(Constants.MONITOR_DEAD, seat.FinalCard.Name, seat.TicketsReceived), this);
+            }
+            else
+            {
+                seat.Monitor.Print(string.Format(Constants.MONITOR_SURVIVOR, seat.FinalCard.Name, seat.TicketsReceived), this);
+            }
         }
 
-        public Seat FindSeat(string player)
+        public void Hunt(string hunterSeatNo, string beHuntedSeatNo)
+        {
+            var hunterSeat = FindSeat(hunterSeatNo);
+            var beHuntedSeat = FindSeat(beHuntedSeatNo);
+            beHuntedSeat.Die();
+            Monitor.Print(string.Format(Constants.MONITOR_HUNT, hunterSeat.No, beHuntedSeat.Player), this);
+        }
+
+
+        public void JudgeWinning(string seatNo)
+        {
+            this.JudgeWinningCamp();
+            var seat = FindSeat(seatNo);
+            seat.Win = seat.FinalCard.JudgeWinning(this, seat.No);
+            if (seat.Win)
+            {
+                seat.Monitor.Print(Constants.MONITOR_WINNER, this);
+            }
+            else
+            {
+                seat.Monitor.Print(Constants.MONITOR_LOSER, this);
+            }
+        }
+
+        public Seat FindSeatByNick(string player)
         {
             foreach (var seat in Seats)
             {
@@ -397,6 +430,18 @@ namespace OneNightWerewolf.Core
                 }
             }
             throw new IndexOutOfRangeException($"不存在{player}玩家");
+        }
+
+        public Seat FindSeat(string no)
+        {
+            foreach (var seat in Seats)
+            {
+                if (string.CompareOrdinal(no, seat.No) == 0)
+                {
+                    return seat;
+                }
+            }
+            throw new IndexOutOfRangeException($"不存在{no}号座位");
         }
 
         public Grave FindGrave(string no)
