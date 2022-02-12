@@ -17,7 +17,7 @@ namespace OneNightWerewolf.Troublemaker
             {
                 for (int j = i+1; j < table.Seats.Length; j++)
                 {
-                    var choice = $"[{table.Seats[i].Player}]与[{table.Seats[j].Player}]";
+                    var choice = $"交换[{table.Seats[i].Player}]与[{table.Seats[j].Player}]";
                     choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
                         { "SwapOthers", $"{table.Seats[i].No},{table.Seats[j].No}"}
