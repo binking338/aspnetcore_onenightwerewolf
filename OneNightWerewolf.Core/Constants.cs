@@ -11,14 +11,14 @@ namespace OneNightWerewolf.Core
         public const string MONITOR_DEAD = "最终身份是【{0}】，{1}票死亡！";
         public const string MONITOR_SURVIVOR = "最终身份是【{0}】，{1}票幸存！";
         public const string MONITOR_SEE_MY_CARD = "你的身份是【{1}】";
-        public const string MONITOR_SEE_OTHERS_CARD = "玩家[{0}]的身份是【{1}】";
-        public const string MONITOR_SEE_GRAVE_CARD = "{0}号中间牌的身份是【{1}】";
+        public const string MONITOR_SEE_OTHERS_CARD = "[{0}]的身份是【{1}】";
+        public const string MONITOR_SEE_GRAVE_CARD = "{0}号牌的身份是【{1}】";
         public const string MONITOR_NONE_PLAYER = "没有找到身份是【{0}】的玩家！";
         public const string MONITOR_FIND_ROLE_PLAYER = "身份是【{0}】的玩家有：[{1}]";
-        public const string MONITOR_HUNT = "玩家[{0}]是猎人，猎人带走了[{1}]";
-        public const string MONITOR_SWAP_OTHERS = "玩家[{0}]与玩家[{1}]交换了身份牌";
-        public const string MONITOR_SWAP_WITH_OTHERS = "你与玩家[{0}]交换了身份牌";
-        public const string MONITOR_SWAP_WITH_GRAVE = "你的身份牌与{0}号中间牌交换了";
-        public const string MONITOR_SWAP_OHTERS_WITH_GRAVE = "玩家[{0}]的身份牌与{1}号中间牌交换了";
+        public const string MONITOR_HUNT = "[{0}]是猎人，他带走了[{1}]";
+        public const string MONITOR_SWAP_OTHERS = "[{0}]与[{1}]换了牌";
+        public const string MONITOR_SWAP_WITH_OTHERS = "你与[{0}]换了牌";
+        public const string MONITOR_SWAP_WITH_GRAVE = "你的牌与{0}号牌交换了";
+        public const string MONITOR_SWAP_OHTERS_WITH_GRAVE = "[{0}]的牌与{1}号牌交换了";
     }
 }

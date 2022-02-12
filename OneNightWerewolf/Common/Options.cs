@@ -34,7 +34,8 @@ namespace OneNightWerewolf.Common
             foreach (var s in table.Seats)
             {
                 if (s.No == seat.No) continue;
-                choices.Add($"{s.Player}", new Choice(table.Round.Phase, table.Round.Name, $"{s.Player}", new Dictionary<string, string>() {
+                var choice = $"[{s.Player}]";
+                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
                     { "Vote", s.No }
                 }));

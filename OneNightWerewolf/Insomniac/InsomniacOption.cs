@@ -14,7 +14,8 @@ namespace OneNightWerewolf.Insomniac
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            choices.Add(Name, new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
+            var choice = Name;
+            choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
                 { "SeeMyCard", seat.No }
             }));

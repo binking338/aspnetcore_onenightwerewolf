@@ -15,7 +15,8 @@ namespace OneNightWerewolf.Drunk
             var choices = new Dictionary<string, Choice>();
             foreach (var grave in table.Graves)
             {
-                choices.Add($"{grave.No}号中间牌", new Choice(table.Round.Phase, table.Round.Name, $"{grave.No}号中间牌", new Dictionary<string, string>() {
+                var choice = $"{grave.No}号牌";
+                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
                     { "SwapWithGraveCard", $"{grave.No}" }
                 }));

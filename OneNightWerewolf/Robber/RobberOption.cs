@@ -16,7 +16,8 @@ namespace OneNightWerewolf.Robber
             for (var i = 0; i < table.Seats.Length; i++)
             {
                 if (seat.No == table.Seats[i].No) continue;
-                choices.Add($"{table.Seats[i].Player}", new Choice(table.Round.Phase, table.Round.Name, $"{table.Seats[i].Player}", new Dictionary<string, string>() {
+                var choice = $"[{table.Seats[i].Player}]";
+                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
                         { "SwapWithOthers", $"{table.Seats[i].No}"},
                         { "SeeMyCard", $"{seat.No}"}

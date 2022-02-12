@@ -16,7 +16,8 @@ namespace OneNightWerewolf.Doppelganger
             foreach (var s in table.Seats)
             {
                 if (s.No == seat.No) continue;
-                choices.Add($"{s.Player}", new Choice(table.Round.Phase, table.Round.Name, $"{s.Player}", new Dictionary<string, string>() {
+                var choice = $"化身[{s.Player}]";
+                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
                     { "SeeOthersCard", $"{s.No}" },
                     { "CopyOthersCard", $"{s.No}" }

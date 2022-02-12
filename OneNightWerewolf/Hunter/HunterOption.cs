@@ -18,7 +18,8 @@ namespace OneNightWerewolf.Hunter
                 foreach (var s in table.Seats)
                 {
                     if (s.No == seat.No) continue;
-                    choices.Add($"{s.Player}", new Choice(table.Round.Phase, table.Round.Name, $"{s.Player}", new Dictionary<string, string>() {
+                    var choice = $"[{s.Player}]";
+                    choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
                         { "Hunt", $"{s.No}" }
                     }));
@@ -26,7 +27,8 @@ namespace OneNightWerewolf.Hunter
             }
             else
             {
-                choices.Add("不能开枪", new Choice(table.Round.Phase, table.Round.Name, "不能开枪", new Dictionary<string, string>() {
+                var choice = "不能开枪";
+                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
                     { "Hunt", $"" }
                 }));

@@ -13,7 +13,8 @@ namespace OneNightWerewolf.Mason
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            choices.Add($"查看其他守夜人", new Choice(table.Round.Phase, table.Round.Name, $"查看其他守夜人", new Dictionary<string, string>() {
+            var choice = $"查看其他守夜人";
+            choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
                 { "FindBuddy", Role.Mason.ToString() }
             }));
