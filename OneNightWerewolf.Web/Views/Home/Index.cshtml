@@ -332,7 +332,7 @@
 
                     $("#ChoicesContainer")
                         .html("")
-                        .append("<h3>" + (choiceInfo.game.inGame ? choiceInfo.round.name : (IamRoomHolder() ? "等待玩家到齐" : "等待房主开始")) + "</h3>");
+                        .append("<h3>" + (choiceInfo.game.inGame ? choiceInfo.round.name : (choiceInfo.choices ? choiceInfo.round.name : "等待房主开始游戏")) + "</h3>");
 
                     if (data.data.choices != null && data.data.choices.length > 0) {
                         var isStartRound = choiceInfo.round.phase == 0;
@@ -418,7 +418,7 @@
                         var choiceInfo = data.data;
                         $("#ChoicesContainer")
                             .html("")
-                            .append("<h3>" + (choiceInfo.game.inGame ? choiceInfo.round.name : (IamRoomHolder() ? "等待玩家到齐" : "等待房主开始")) + "</h3>");
+                            .append("<h3>" + (choiceInfo.game.inGame ? choiceInfo.round.name : (choiceInfo.choices ? choiceInfo.round.name : "等待房主开始游戏")) + "</h3>");
                         
                         choiceInfo.messages.forEach(function (message, i) {
                             $("#ChoicesContainer").append($("<h3>").text(message.content));
