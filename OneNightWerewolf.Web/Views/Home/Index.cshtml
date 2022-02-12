@@ -418,7 +418,7 @@
                         var choiceInfo = data.data;
                         $("#ChoicesContainer")
                             .html("")
-                            .append("<h3>" + (choiceInfo.game.inGame ? choiceInfo.round.name : (choiceInfo.choices ? choiceInfo.round.name : "等待房主开始游戏")) + "</h3>");
+                            .append("<h3>" + (choiceInfo.game.inGame ? choiceInfo.round.name : "等待房主开始游戏") + "</h3>");
                         
                         choiceInfo.messages.forEach(function (message, i) {
                             $("#ChoicesContainer").append($("<h3>").text(message.content));
