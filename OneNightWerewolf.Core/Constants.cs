@@ -8,8 +8,8 @@ namespace OneNightWerewolf.Core
         public const string MONITOR_WINNING_CAMP_WEREWOLF = "胜利阵营是【狼人阵营】";
         public const string MONITOR_WINNER = "恭喜，你胜利了";
         public const string MONITOR_LOSER = "抱歉，你失败了";
-        public const string MONITOR_DEAD = "最终身份是【{0}】({1}票)【死亡】！";
-        public const string MONITOR_SURVIVOR = "最终身份是【{0}】({1}票)【幸存】！";
+        public const string MONITOR_DEAD = "最终身份是【{0}】，{1}票死亡！";
+        public const string MONITOR_SURVIVOR = "最终身份是【{0}】，{1}票幸存！";
         public const string MONITOR_SEE_MY_CARD = "你的身份是【{1}】";
         public const string MONITOR_SEE_OTHERS_CARD = "玩家[{0}]的身份是【{1}】";
         public const string MONITOR_SEE_GRAVE_CARD = "{0}号中间牌的身份是【{1}】";
