@@ -234,7 +234,7 @@
         }
 
         function IamRoomHolder() {
-            return Position.cache.isHolder;
+            return Position.cache ? Position.cache.isHolder : false;
         }
 
         function RoomList() {
@@ -328,46 +328,53 @@
                         DawnClock(dawnTime, overTime);
                     }
 
-                    var descs = data.data;
+                    var choiceInfo = data.data;
 
                     $("#ChoicesContainer")
                         .html("")
-                        .append("<h3>" + (descs.game.inGame ? descs.round.phaseName : "等待房主开始") + "</h3>");
+                        .append("<h3>" + (choiceInfo.game.inGame ? choiceInfo.round.name : (IamRoomHolder() ? "等待玩家到齐" : "等待房主开始")) + "</h3>");
 
                     if (data.data.choices != null && data.data.choices.length > 0) {
-                        var isStartRound = descs.round.phase == 0;
-                        var isOverRound = descs.round.phase == 99;
-                        var isVoteRound = descs.round.phase == 30 && descs.round.name == '投票';
-                        var isNightPhase = descs.round.phase == 10;
+                        var isStartRound = choiceInfo.round.phase == 0;
+                        var isOverRound = choiceInfo.round.phase == 99;
+                        var isVoteRound = choiceInfo.round.phase == 30 && choiceInfo.round.name == '投票';
+                        var isNightPhase = choiceInfo.round.phase == 10;
                         if (isStartRound || isVoteRound || isOverRound) {
                             /* 身份 投票 结束 阶段不自动选 */
                             CancelCountDown();
                         } else if (isNightPhase && IsAutoRefreshEnabled()) {
                             CountDown(R(10, 15), function () {
-                                var idx = R(0, descs.choices.length);
-                                Action(descs.choices[idx]);
+                                var idx = R(0, choiceInfo.choices.length);
+                                Action(choiceInfo.choices[idx]);
                             });
                         } else {
                             CountDown(R(1, 3), function () {
-                                var idx = R(0, descs.choices.length);
-                                Action(descs.choices[idx]);
+                                var idx = R(0, choiceInfo.choices.length);
+                                Action(choiceInfo.choices[idx]);
                             });
                         }
-                        descs.choices.forEach(function (desc, i) {
-                            var btn = $("<a href='javascript:void(0)' />").text(desc);
+                        choiceInfo.choices.forEach(function (choice, i) {
+                            var btn = $("<a href='javascript:void(0)' />").text(choice);
                             if (isVoteRound) {
                                 btn.click(function () {
-                                    if (window.confirm("确定" + desc + "?")) {
-                                        Action(desc);
+                                    if (window.confirm("确定" + choice + "?")) {
+                                        Action(choice);
                                     }
                                 });
                             } else {
                                 btn.click(function () {
-                                    Action(desc);
+                                    Action(choice);
                                 });
                             }
                             $("#ChoicesContainer").append($("<h3>").append(btn));
                         });
+                    } else {
+                        choiceInfo.messages.forEach(function (message, i) {
+                            $("#ChoicesContainer").append($("<h3>").text(message.content));
+                        });
+                        if (choiceInfo.game.inGame && (choiceInfo.messages == null || choiceInfo.messages.length == 0)) {
+                            $("#ChoicesContainer").append($("<h3>").text("已操作"));
+                        }
                     }
                 }
             });
@@ -379,6 +386,7 @@
                     if (data.code > 0) {
                         //alert(data.message);
                     } else {
+                        Screen.messages = data.data;
                         $("#MonitorContainer").html("");
                         if (data.data == null || data.data.length == 0) {
                             return;
@@ -406,8 +414,20 @@
                         } else {
                             alert(data.message);
                         }
+                    } else {
+                        var choiceInfo = data.data;
+                        $("#ChoicesContainer")
+                            .html("")
+                            .append("<h3>" + (choiceInfo.game.inGame ? choiceInfo.round.name : (IamRoomHolder() ? "等待玩家到齐" : "等待房主开始")) + "</h3>");
+                        
+                        choiceInfo.messages.forEach(function (message, i) {
+                            $("#ChoicesContainer").append($("<h3>").text(message.content));
+                        });
+                        if (choiceInfo.game.inGame && (choiceInfo.messages == null || choiceInfo.messages.length == 0)) {
+                            $("#ChoicesContainer").append($("<h3>").text("已操作"));
+                        }
+                        AutoNextPhase();
                     }
-                    Choices();
                 });
         }
 

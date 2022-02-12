@@ -8,6 +8,8 @@ namespace OneNightWerewolf.Web.Models
         public RoundInfo Round { get; set; }
 
         public string[] Choices { get; set; }
+
+        public MessageInfo[] Messages { get; set; }
     }
 
     public class GameInfo
@@ -32,5 +34,16 @@ namespace OneNightWerewolf.Web.Models
         public string Name { get; set; }
 
         public int Order { get; set; }
+    }
+
+    public class MessageInfo
+    {
+        public string Channel { get; set; }
+
+        public long Time { get; set; }
+
+        public string Content { get; set; }
+
+        public RoundInfo Round { get; set; }
     }
 }

@@ -13,8 +13,8 @@ namespace OneNightWerewolf.Core
         public const string MONITOR_SEE_MY_CARD = "你的身份是【{1}】";
         public const string MONITOR_SEE_OTHERS_CARD = "玩家[{0}]的身份是【{1}】";
         public const string MONITOR_SEE_GRAVE_CARD = "{0}号中间牌的身份是【{1}】";
-        public const string MONITOR_NONE_PLAYER = "【{0}】同伴没有找到！";
-        public const string MONITOR_FIND_ROLE_PLAYER = "【{0}】同伴有：[{1}]";
+        public const string MONITOR_NONE_PLAYER = "没有找到身份是【{0}】的玩家！";
+        public const string MONITOR_FIND_ROLE_PLAYER = "身份是【{0}】的玩家有：[{1}]";
         public const string MONITOR_HUNT = "玩家[{0}]是猎人，猎人带走了[{1}]";
         public const string MONITOR_SWAP_OTHERS = "玩家[{0}]与玩家[{1}]交换了身份牌";
         public const string MONITOR_SWAP_WITH_OTHERS = "你与玩家[{0}]交换了身份牌";

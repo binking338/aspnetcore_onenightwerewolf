@@ -83,6 +83,11 @@ namespace OneNightWerewolf.Core
             return false;
         }
 
+        public bool HasPlayer(string playerId)
+        {
+            return Players.Any(p => p.Id == playerId);
+        }
+
         public Player FindPlayer(string playerId)
         {
             return Players.FirstOrDefault(p => p.Id == playerId);
@@ -95,7 +100,7 @@ namespace OneNightWerewolf.Core
 
         public bool Start()
         {
-            if (!Table.IsAllSeatTaken())
+            if (!Table.IsAllSeatReady())
             {
                 return false;
             }

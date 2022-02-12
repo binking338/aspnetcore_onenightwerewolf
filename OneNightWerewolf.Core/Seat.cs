@@ -17,6 +17,8 @@ namespace OneNightWerewolf.Core
 
         public string Player { get; private set; }
 
+        public bool Ready { get; set; }
+
         public IMonitor Monitor { get; set; }
 
         public Seat TicketVotedFor { get; private set; }
@@ -47,11 +49,13 @@ namespace OneNightWerewolf.Core
         public void TakeBy(string player)
         {
             Player = player;
+            Ready = true;
         }
 
         public void TakeOff()
         {
             Player = string.Empty;
+            Ready = false;
         }
 
         public void Vote(Seat seat)

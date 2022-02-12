@@ -213,12 +213,12 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<bool>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            if (!room.Players.Any(p => p.Id == user.Id))
+            if (!room.HasPlayer(user.Id))
             {
                 user.RoomId = null;
                 return Response<bool>.Error(8, $"你已不在房间[{user.RoomId}]中");
             }
-            room.TakeOut(room.Players.First(p => p.Id == user.Id));
+            room.TakeOut(room.FindPlayer(user.Id));
             user.RoomId = null;
             return Response<bool>.Return(true);
         }
@@ -236,7 +236,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<PlayerInfo[]>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            var player = room.Players.FirstOrDefault(p => p.Id == user.Id);
+            var player = room.FindPlayer(user.Id);
             if (player == null)
                 return Response<PlayerInfo[]>.Error(8, $"不在房间[{user.RoomId}]中");
             var playerInfos = room.Players.Where(s => !string.IsNullOrWhiteSpace(s.Id))
@@ -264,7 +264,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (room?.Holder.Id == id)
                 return Response<bool>.Error(14, $"房主不能被踢");
 
-            var player = room.Players.FirstOrDefault(p => p.Id == id);
+            var player = room.FindPlayer(id);
 
             if (player != null)
             {
@@ -296,8 +296,8 @@ namespace OneNightWerewolf.Web.Controllers.Api
             var room = roomRepository.Get(user.RoomId);
             if (room?.Holder?.Id != user.Id)
                 return Response<bool>.Error(10, "房主才能开始游戏");
-            if (!room.Table.IsAllSeatTaken())
-                return Response<bool>.Error(9, "人数不齐");
+            if (!room.Table.IsAllSeatReady())
+                return Response<bool>.Error(9, "人数不齐或未准备");
             if (!room.Table.IsGameFinished())
                 return Response<bool>.Return(true);
             return Response<bool>.Return(room.Start());
@@ -373,6 +373,8 @@ namespace OneNightWerewolf.Web.Controllers.Api
             var choiceMaded = room.Table.SeatChoices.ContainsKey(seat.No);
             var choices = choiceMaded ? null : room.Choices(player);
             ChoicesInfo result = ToChoicesInfo(room, choices?.Keys.ToArray());
+            result.Messages = result.Game.InGame ? GetMessageInfos(room, room.Table.FindSeatByNick(player.Nick).No)
+                .Where(m => m.Round.Index == result.Round.Index).ToArray() : new MessageInfo[0];
             return Response<ChoicesInfo>.Return(result);
         }
 
@@ -389,14 +391,11 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<List<MessageInfo>>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            var player = room.Players.FirstOrDefault(p => p.Id == user.Id);
+            var player = room.FindPlayer(user.Id);
             if (player == null)
                 return Response<List<MessageInfo>>.Error(8, $"不在房间[{user.RoomId}]中");
 
-            var messages = new List<MessageInfo>();
-            messages.AddRange(room.Table.Monitor.Display().Select(msg => ToMessageInfo("GM", msg)));
-            messages.AddRange(room.Table.FindSeatByNick(player.Nick).Monitor.Display().Select(msg => ToMessageInfo("", msg)));
-            messages = messages.OrderBy(m => m.Time).ToList();
+            var messages = GetMessageInfos(room, room.Table.FindSeatByNick(player.Nick).No);
 
             return Response<List<MessageInfo>>.Return(messages);
         }
@@ -415,14 +414,17 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<ChoicesInfo>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            var player = room.Players.FirstOrDefault(p => p.Id == user.Id);
+            var player = room.FindPlayer(user.Id);
             if (player == null)
                 return Response<ChoicesInfo>.Error(8, $"不在房间[{user.RoomId}]中");
 
+            ChoicesInfo result = ToChoicesInfo(room, new string[] { choice });
+
             var choices = room.Choices(player);
             room.Action(player, choices[choice]);
+            result.Messages = result.Game.InGame ? GetMessageInfos(room, room.Table.FindSeatByNick(player.Nick).No)
+                .Where(m => m.Round.Index == result.Round.Index).ToArray() : new MessageInfo[0];
 
-            ChoicesInfo result = ToChoicesInfo(room, new string[] { choice });
             return Response<ChoicesInfo>.Return(result);
         }
 
@@ -444,6 +446,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             choicesInfo.Game = ToGameInfo(room);
             choicesInfo.Round = ToRoundInfo(room);
             choicesInfo.Choices = choices;
+            choicesInfo.Messages = new MessageInfo[0];
             return choicesInfo;
         }
 
@@ -479,6 +482,15 @@ namespace OneNightWerewolf.Web.Controllers.Api
             return roundInfo;
         }
 
+        private List<MessageInfo> GetMessageInfos(Room room, string seatNo)
+        {
+            var messages = new List<MessageInfo>();
+            messages.AddRange(room.Table.Monitor.Display().Select(msg => ToMessageInfo("GM", msg)));
+            messages.AddRange(room.Table.FindSeat(seatNo).Monitor.Display().Select(msg => ToMessageInfo("", msg)));
+            messages = messages.OrderBy(m => m.Time).ToList();
+            return messages;
+        }
+
         private MessageInfo ToMessageInfo(string channel, IMonitor.Message message)
         {
             var messageInfo = new MessageInfo() {
@@ -496,6 +508,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             };
             return messageInfo;
         }
+
         #endregion
     }
 }

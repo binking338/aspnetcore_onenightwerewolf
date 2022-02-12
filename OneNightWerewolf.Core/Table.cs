@@ -158,6 +158,10 @@ namespace OneNightWerewolf.Core
             else if(Round.Phase == Phase.Over && !OverTime.HasValue)
             {
                 OverTime = DateTime.Now;
+                foreach(var seat in Seats)
+                {
+                    seat.Ready = false;
+                }
             }
         }
 
@@ -196,6 +200,19 @@ namespace OneNightWerewolf.Core
             return true;
         }
 
+        public bool IsAllSeatReady()
+        {
+            if (Seats == null) return false;
+            foreach (var seat in Seats)
+            {
+                if (string.IsNullOrWhiteSpace(seat.Player) || !seat.Ready)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public bool Takeseat(string player)
         {
             if (IsAllSeatTaken())
@@ -217,6 +234,12 @@ namespace OneNightWerewolf.Core
         {
             var seat = FindSeatByNick(player);
             seat.TakeOff();
+        }
+
+        public void Ready(string seatNo)
+        {
+            var seat = FindSeat(seatNo);
+            seat.Ready = true;
         }
 
         #endregion

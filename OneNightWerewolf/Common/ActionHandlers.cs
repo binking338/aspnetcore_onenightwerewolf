@@ -216,7 +216,7 @@ namespace OneNightWerewolf.Common
 
         public void Handle(Table table, Seat seat, Choice choice)
         {
-            // todo 准备机制
+            table.Ready(seat.No);
         }
     }
 }
