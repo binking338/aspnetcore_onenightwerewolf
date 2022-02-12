@@ -34,6 +34,10 @@ namespace OneNightWerewolf.Web.Controllers.Api
             User user = userRepository.Get(userId);
             if (user != null)
             {
+                if (string.IsNullOrEmpty(user.Password))
+                {
+                    user.Password = password;
+                }
                 if (user.ClientId != clientId && user.Password != password)
                 {
                     return Response<bool>.Error(-2, "密码不正确！");
