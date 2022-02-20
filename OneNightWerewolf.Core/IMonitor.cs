@@ -7,11 +7,11 @@ namespace OneNightWerewolf.Core
 {
     public interface IMonitor
     {
-        void Print(string message, Table table);
+        void Print(Message message);
 
         void Clear();
 
-        IList<Message> Display();
+        List<Message> Messages { get; }
 
         public class Message
         {
@@ -29,31 +29,37 @@ namespace OneNightWerewolf.Core
         }
     }
 
-    public class HtmlMonitor : IMonitor
+    public class DefaultMonitor : IMonitor
     {
-        private List<Message> Messages = new List<Message>();
 
         public void Clear()
         {
             Messages.Clear();
         }
 
-        public void Print(string message, Table table)
+        public void Print(Message message)
         {
-            Messages.Add(new Message()
-            {
-                Time = DateTime.Now,
-                Content = message,
-                Phase = table.Round.Phase,
-                RoundOrder = table.Round.Order,
-                RoundName = table.Round.Name,
-                RoundIndex = table.RoundIndex
-            });
+            Messages.Add(message);
         }
 
-        public IList<Message> Display()
+        public void Print(string content, Table table)
         {
-            return Messages;
+            Print(DefaultMonitor.Of(content, table));
+        }
+
+        public List<Message> Messages { get; set; } = new List<Message>();
+
+        public static Message Of(string content, Table table)
+        {
+            return new Message()
+            {
+                Time = DateTime.Now,
+                Content = content,
+                Phase = table.GetRound().Phase,
+                RoundOrder = table.GetRound().Order,
+                RoundName = table.GetRound().Name,
+                RoundIndex = table.RoundIndex
+            };
         }
     }
 }

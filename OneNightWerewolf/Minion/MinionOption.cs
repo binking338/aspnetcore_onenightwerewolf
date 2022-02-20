@@ -14,7 +14,7 @@ namespace OneNightWerewolf.Minion
         {
             var choices = new Dictionary<string, Choice>();
             var choice = $"查看狼人";
-            choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
+            choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
                 { "FindBuddy", Role.Werewolf.ToString() }
             }));

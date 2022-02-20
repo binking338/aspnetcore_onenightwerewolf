@@ -17,7 +17,7 @@ namespace OneNightWerewolf.Werewolf
             if(table.Seats.Count(s => s.OriginCard.Role == Role.Werewolf) > 1)
             {
                 var choice = $"查看其他狼人";
-                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
+                choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
                     { "FindBuddy", Role.Werewolf.ToString() }
                 }));
@@ -42,7 +42,7 @@ namespace OneNightWerewolf.Werewolf
                 foreach (var grave in table.Graves)
                 {
                     var choice = $"查看{grave.No}号牌";
-                    choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
+                    choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
                         { "SeeGraveCard", $"{grave.No}" }
                     }));

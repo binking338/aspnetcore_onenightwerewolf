@@ -9,21 +9,21 @@ namespace OneNightWerewolf.Core
         public Seat(string no)
         {
             No = no;
-            Monitor = new HtmlMonitor();
-            TicketsReceivedFrom = new List<Seat>();
+            Monitor = new DefaultMonitor();
+            TicketsReceivedFrom = new List<string>();
         }
 
-        public string No { get; }
+        public string No { get; private set; }
 
         public string Player { get; private set; }
 
         public bool Ready { get; set; }
 
-        public IMonitor Monitor { get; set; }
+        public DefaultMonitor Monitor { get; set; }
 
-        public Seat TicketVotedFor { get; private set; }
+        public string TicketVotedFor { get; private set; }
 
-        public IList<Seat> TicketsReceivedFrom { get; private set; }
+        public List<string> TicketsReceivedFrom { get; private set; }
 
         public int TicketsReceived { get; private set; }
 
@@ -60,13 +60,14 @@ namespace OneNightWerewolf.Core
 
         public void Vote(Seat seat)
         {
-            this.TicketVotedFor = seat;
+            this.TicketVotedFor = seat.No;
             seat.BeVoted(this);
         }
 
         public void BeVoted(Seat seat)
         {
             this.TicketsReceived++;
+            this.TicketsReceivedFrom.Add(seat.No);
         }
 
         public void Die()

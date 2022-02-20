@@ -470,14 +470,14 @@ namespace OneNightWerewolf.Web.Controllers.Api
 
         private RoundInfo ToRoundInfo(Room room)
         {
-            var roundInfo = (room?.Table?.Round != null) ?
+            var roundInfo = (room?.Table?.GetRound() != null) ?
                 new RoundInfo()
                 {
                     Index = room.Table.RoundIndex,
-                    Phase = room.Table.Round.Phase,
-                    PhaseName = room.Table.Round.Phase.Readable(),
-                    Order = room.Table.Round.Order,
-                    Name = room.Table.Round.Name
+                    Phase = room.Table.GetRound().Phase,
+                    PhaseName = room.Table.GetRound().Phase.Readable(),
+                    Order = room.Table.GetRound().Order,
+                    Name = room.Table.GetRound().Name
                 } : new RoundInfo();
             return roundInfo;
         }
@@ -485,8 +485,8 @@ namespace OneNightWerewolf.Web.Controllers.Api
         private List<MessageInfo> GetMessageInfos(Room room, string seatNo)
         {
             var messages = new List<MessageInfo>();
-            messages.AddRange(room.Table.Monitor.Display().Select(msg => ToMessageInfo("GM", msg)));
-            messages.AddRange(room.Table.FindSeat(seatNo).Monitor.Display().Select(msg => ToMessageInfo("", msg)));
+            messages.AddRange(room.Table.Monitor.Messages.Select(msg => ToMessageInfo("GM", msg)));
+            messages.AddRange(room.Table.FindSeat(seatNo).Monitor.Messages.Select(msg => ToMessageInfo("", msg)));
             messages = messages.OrderBy(m => m.Time).ToList();
             return messages;
         }

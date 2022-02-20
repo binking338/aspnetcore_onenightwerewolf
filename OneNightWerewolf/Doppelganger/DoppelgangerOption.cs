@@ -17,7 +17,7 @@ namespace OneNightWerewolf.Doppelganger
             {
                 if (s.No == seat.No) continue;
                 var choice = $"化身[{s.Player}]";
-                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
+                choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
                     { "SeeOthersCard", $"{s.No}" },
                     { "CopyOthersCard", $"{s.No}" }

@@ -17,7 +17,7 @@ namespace OneNightWerewolf.Robber
             {
                 if (seat.No == table.Seats[i].No) continue;
                 var choice = $"交换[{table.Seats[i].Player}]";
-                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
+                choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
                         { "SwapWithOthers", $"{table.Seats[i].No}"},
                         { "SeeMyCard", $"{seat.No}"}

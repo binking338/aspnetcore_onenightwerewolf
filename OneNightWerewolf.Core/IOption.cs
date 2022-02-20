@@ -21,7 +21,7 @@ namespace OneNightWerewolf.Core
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            choices[Name] = new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
+            choices[Name] = new Choice(table.GetRound().Phase, table.GetRound().Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
                 { "None", string.Empty }
             });

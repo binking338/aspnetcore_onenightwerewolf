@@ -39,7 +39,7 @@ namespace OneNightWerewolf.Web
                     Version = "v1",
                     Title = "One Night Ultimate Werewolf",
                     Description = "One Night Ultimate Werewolf ASP.NET Core Web API",
-                    TermsOfService = new Uri("/"),
+                    TermsOfService = new Uri("/", UriKind.Relative),
                 });
 
                 // Set the comments path for the Swagger JSON and UI.

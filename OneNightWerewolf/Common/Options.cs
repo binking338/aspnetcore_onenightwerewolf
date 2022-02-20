@@ -14,7 +14,7 @@ namespace OneNightWerewolf.Common
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            choices[Name] = new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
+            choices[Name] = new Choice(table.GetRound().Phase, table.GetRound().Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
                 { "SeeMyCard", seat.No }
             });
@@ -35,7 +35,7 @@ namespace OneNightWerewolf.Common
             {
                 if (s.No == seat.No) continue;
                 var choice = $"[{s.Player}]是狼人";
-                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
+                choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                     { "Option", $"{Name}" },
                     { "Vote", s.No }
                 }));
@@ -53,7 +53,7 @@ namespace OneNightWerewolf.Common
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            choices.Add(Name, new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
+            choices.Add(Name, new Choice(table.GetRound().Phase, table.GetRound().Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
                 { "Tickets", $"{seat.No}" }
             }));
@@ -70,7 +70,7 @@ namespace OneNightWerewolf.Common
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            choices.Add(Name, new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
+            choices.Add(Name, new Choice(table.GetRound().Phase, table.GetRound().Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
                 { "Judge",  $"{seat.No}" }
             }));
@@ -87,7 +87,7 @@ namespace OneNightWerewolf.Common
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            choices.Add(Name, new Choice(table.Round.Phase, table.Round.Name, Name, new Dictionary<string, string>() {
+            choices.Add(Name, new Choice(table.GetRound().Phase, table.GetRound().Name, Name, new Dictionary<string, string>() {
                 { "Option", $"{Name}" },
                 { "Ready", seat.No }
             }));

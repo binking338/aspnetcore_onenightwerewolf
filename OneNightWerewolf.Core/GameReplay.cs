@@ -9,19 +9,25 @@ namespace OneNightWerewolf.Core
         {
         }
 
-        public IList<GameRoundHistory> Histories { get; } = new List<GameRoundHistory>();
+        public List<GameRoundHistory> Histories { get; set; } = new List<GameRoundHistory>();
     }
 
-    public class GameRoundHistory
+    public class GameRoundHistory : IRound
     {
-        public GameRoundHistory(IRound round, IDictionary<string, Choice> playerChoices)
+        public GameRoundHistory(IRound round, Dictionary<string, Choice> playerChoices)
         {
-            Round = round;
+            Phase = round.Phase;
+            Order = round.Order;
+            Name = round.Name;
             PlayerChoices = playerChoices;
         }
 
-        public IRound Round { get; private set; }
+        public Phase Phase { get; }
 
-        public IDictionary<string, Choice> PlayerChoices { get; private set; } 
+        public int Order { get; }
+
+        public string Name { get; }
+
+        public Dictionary<string, Choice> PlayerChoices { get; private set; } 
     }
 }

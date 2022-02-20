@@ -23,7 +23,7 @@ namespace OneNightWerewolf.Core
 
         public DateTime CreateTime { get; private set; }
 
-        public IList<Player> Players { get; }
+        public List<Player> Players { get; }
 
         public int PlayerLimit { get; private set; }
 

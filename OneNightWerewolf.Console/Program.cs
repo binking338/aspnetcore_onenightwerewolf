@@ -27,12 +27,6 @@ namespace OneNightWerewolf.Console
                 room.TakeIn(users[i]);
             }
 
-            room.Table.Monitor = new ConsoleMonitor("public");
-            for (var i = 0; i < room.PlayerLimit; i++)
-            {
-                room.Table.Seats[i].Monitor = new ConsoleMonitor(users[i].Nick);
-            }
-
             for(var t =0; t < 100; t++)
             {
 
@@ -57,6 +51,19 @@ namespace OneNightWerewolf.Console
 
                 }
                 while (!room.Table.IsGameFinished());
+
+
+                foreach(var msg in room.Table.Monitor.Messages)
+                {
+                    System.Console.WriteLine($"public : [{msg.Phase }] {msg.Content}");
+                }
+                for (var i = 0; i < room.PlayerLimit; i++)
+                {
+                    foreach (var msg in room.Table.Seats[i].Monitor.Messages)
+                    {
+                        System.Console.WriteLine($"seat{room.Table.Seats[i].No} : [{msg.Phase }] {msg.Content}");
+                    }
+                }
                 //room.ForceStop();
             }
 

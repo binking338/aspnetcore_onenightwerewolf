@@ -5,7 +5,7 @@ namespace OneNightWerewolf.Core
 {
     public class Choice
     {
-        public Choice(Phase phase, string roundName, string title, IDictionary<string, string> data)
+        public Choice(Phase phase, string roundName, string title, Dictionary<string, string> data)
         {
             Phase = phase;
             RoundName = roundName;
@@ -13,9 +13,9 @@ namespace OneNightWerewolf.Core
             Data = data;
         }
 
-        public Phase Phase { get; }
-        public string RoundName { get; }
-        public string Title { get; }
-        public IDictionary<string, string> Data { get; }
+        public Phase Phase { get; private set; }
+        public string RoundName { get; private set; }
+        public string Title { get; private set; }
+        public Dictionary<string, string> Data { get; private set; }
     }
 }

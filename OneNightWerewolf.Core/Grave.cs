@@ -8,7 +8,7 @@ namespace OneNightWerewolf.Core
             No = no;
         }
 
-        public string No { get; }
+        public string No { get; private set; }
 
         public ICard OriginCard { get; set; }
 

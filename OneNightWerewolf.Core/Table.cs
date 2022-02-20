@@ -13,9 +13,9 @@ namespace OneNightWerewolf.Core
 
         public Game Game { get; private set; }
 
-        public Grave[] Graves { get; private set; }
-
         public Seat[] Seats { get; private set; }
+
+        public Grave[] Graves { get; private set; }
 
         public DateTime? StartTime { get; private set; }
 
@@ -25,15 +25,13 @@ namespace OneNightWerewolf.Core
 
         public int RoundIndex { get; private set; } = -1;
 
-        public IRound Round { get; private set; } = null;
+        public Camp? WinningCamp { get; private set; }
 
-        public IDictionary<string, Choice> SeatChoices { get; } = new Dictionary<string, Choice>();
+        public Dictionary<string, Choice> SeatChoices { get; } = new Dictionary<string, Choice>();
 
         public GameReplay Replay { get; } = new GameReplay();
 
-        public IMonitor Monitor { get; set; } = new HtmlMonitor();
-
-        public Camp? WinningCamp { get; private set; }
+        public DefaultMonitor Monitor { get; set; } = new DefaultMonitor();
 
         #region Game
 
@@ -54,7 +52,6 @@ namespace OneNightWerewolf.Core
         public bool NewGame()
         {
             RoundIndex = -1;
-            Round = null;
             StartTime = null;
             DawnTime = null;
             OverTime = null;
@@ -68,9 +65,14 @@ namespace OneNightWerewolf.Core
             return true;
         }
 
+        public IRound GetRound()
+        {
+            return Game.Rounds[RoundIndex];
+        }
+
         public bool IsGameFinished()
         {
-            return Round == null || IsLastRound();
+            return GetRound() == null || IsLastRound();
         }
 
         public void Recycle()
@@ -119,23 +121,22 @@ namespace OneNightWerewolf.Core
             switch (WinningCamp)
             {
                 case Camp.None:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_NONE, this);
+                    Monitor.Print(DefaultMonitor.Of(Constants.MONITOR_WINNING_CAMP_NONE, this));
                     break;
                 case Camp.Villiage:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_VILLIAGE, this);
+                    Monitor.Print(DefaultMonitor.Of(Constants.MONITOR_WINNING_CAMP_VILLIAGE, this));
                     break;
                 case Camp.Werewolf:
-                    Monitor.Print(Constants.MONITOR_WINNING_CAMP_WEREWOLF, this);
+                    Monitor.Print(DefaultMonitor.Of(Constants.MONITOR_WINNING_CAMP_WEREWOLF, this));
                     break;
             }
         }
 
         public void NextRound()
         {
-            if(Round == null && RoundIndex == -1)
+            if(GetRound() == null && RoundIndex == -1)
             {
                 RoundIndex = 0;
-                Round = Game.Rounds[0];
                 StartTime = DateTime.Now;
             }
             if (!IsRoundFinished() || IsLastRound())
@@ -143,19 +144,18 @@ namespace OneNightWerewolf.Core
                 return;
             }
 
-            Replay.Histories.Add(new GameRoundHistory(Round, new Dictionary<string, Choice>(SeatChoices)));
+            Replay.Histories.Add(new GameRoundHistory(GetRound(), new Dictionary<string, Choice>(SeatChoices)));
             SeatChoices.Clear();
             do
             {
                 RoundIndex++;
-                Round = Game.Rounds[RoundIndex];
 
-            } while (!Round.Enabled(this));
-            if(Round.Phase >= Phase.Dawn && !DawnTime.HasValue)
+            } while (!GetRound().Enabled(this));
+            if(GetRound().Phase >= Phase.Dawn && !DawnTime.HasValue)
             {
                 DawnTime = DateTime.Now;
             }
-            else if(Round.Phase == Phase.Over && !OverTime.HasValue)
+            else if(GetRound().Phase == Phase.Over && !OverTime.HasValue)
             {
                 OverTime = DateTime.Now;
                 foreach(var seat in Seats)
@@ -298,11 +298,11 @@ namespace OneNightWerewolf.Core
         private IAbility GetAbility(string seatNo)
         {
             var seat = FindSeat(seatNo);
-            if (Round == null) return null;
-            var card = Round.Phase > Phase.Dawn ? seat.FinalCard : seat.OriginCard;
+            if (GetRound() == null) return null;
+            var card = GetRound().Phase > Phase.Dawn ? seat.FinalCard : seat.OriginCard;
             foreach (var ability in card.Abilities)
             {
-                if (ability.TriggerCondition?.Invoke(Round) == true)
+                if (ability.TriggerCondition?.Invoke(GetRound()) == true)
                 {
                     return ability;
                 }
@@ -328,11 +328,11 @@ namespace OneNightWerewolf.Core
             }
             if (roleSeats.Count == 0)
             {
-                seat.Monitor.Print(string.Format(Constants.MONITOR_NONE_PLAYER, roleName), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_NONE_PLAYER, roleName), this));
             }
             else
             {
-                seat.Monitor.Print(string.Format(Constants.MONITOR_FIND_ROLE_PLAYER, roleName, string.Join(",", roleSeats.Select(w => w.Player))), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_FIND_ROLE_PLAYER, roleName, string.Join(",", roleSeats.Select(w => w.Player))), this));
             }
         }
 
@@ -340,7 +340,7 @@ namespace OneNightWerewolf.Core
         {
             var seat = FindSeat(seatNo);
 
-            seat.Monitor.Print(string.Format(Constants.MONITOR_SEE_MY_CARD, seat.Player, seat.FinalCard.Name), this);
+            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_MY_CARD, seat.Player, seat.FinalCard.Name), this));
         }
 
         public void SeeCardInSeat(string seatNo, string targetSeatNo)
@@ -348,14 +348,14 @@ namespace OneNightWerewolf.Core
             var seat = FindSeat(seatNo);
             var target = FindSeat(targetSeatNo);
 
-            seat.Monitor.Print(string.Format(Constants.MONITOR_SEE_OTHERS_CARD, target, target.FinalCard.Name), this);
+            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_OTHERS_CARD, target, target.FinalCard.Name), this));
         }
 
         public void SeeCardInGrave(string seatNo, string targetGraveNo)
         {
             var seat = FindSeat(seatNo);
             var grave = FindGrave(targetGraveNo);
-            seat.Monitor.Print(string.Format(Constants.MONITOR_SEE_GRAVE_CARD, grave.No, grave.FinalCard.Name), this);
+            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_GRAVE_CARD, grave.No, grave.FinalCard.Name), this));
         }
 
         public void SwapCardsBetweenSeats(string seatNo, string targetSeatNo1, string targetSeatNo2)
@@ -367,17 +367,17 @@ namespace OneNightWerewolf.Core
             if (seatNo == targetSeatNo1)
             {
                 // 自己与他人交换
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_OTHERS, seat2.Player), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SWAP_WITH_OTHERS, seat2.Player), this));
             }
             else if (seatNo == targetSeatNo2)
             {
                 // 自己与他人交换
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_OTHERS, seat1.Player), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SWAP_WITH_OTHERS, seat1.Player), this));
             }
             else
             {
                 // 交换其他人
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_OTHERS, seat1.Player, seat2.Player), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SWAP_OTHERS, seat1.Player, seat2.Player), this));
             }
         }
 
@@ -390,11 +390,11 @@ namespace OneNightWerewolf.Core
             if (seatNo == targetSeatNo)
             {
                 // 自己与中间牌交换
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_WITH_GRAVE, targetGraveNo), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SWAP_WITH_GRAVE, targetGraveNo), this));
             }
             else
             {
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SWAP_OHTERS_WITH_GRAVE, seat1.No, targetGraveNo), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SWAP_OHTERS_WITH_GRAVE, seat1.No, targetGraveNo), this));
             }
         }
 
@@ -411,11 +411,11 @@ namespace OneNightWerewolf.Core
             var seat = FindSeat(seatNo);
             if (seat.Dead)
             {
-                seat.Monitor.Print(string.Format(Constants.MONITOR_DEAD, seat.FinalCard.Name, seat.TicketsReceived), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_DEAD, seat.FinalCard.Name, seat.TicketsReceived), this));
             }
             else
             {
-                seat.Monitor.Print(string.Format(Constants.MONITOR_SURVIVOR, seat.FinalCard.Name, seat.TicketsReceived), this);
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SURVIVOR, seat.FinalCard.Name, seat.TicketsReceived), this));
             }
         }
 
@@ -424,7 +424,7 @@ namespace OneNightWerewolf.Core
             var hunterSeat = FindSeat(hunterSeatNo);
             var beHuntedSeat = FindSeat(beHuntedSeatNo);
             beHuntedSeat.Die();
-            Monitor.Print(string.Format(Constants.MONITOR_HUNT, hunterSeat.No, beHuntedSeat.Player), this);
+            Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_HUNT, hunterSeat.No, beHuntedSeat.Player), this));
         }
 
 
@@ -435,11 +435,11 @@ namespace OneNightWerewolf.Core
             seat.Win = seat.FinalCard.JudgeWinning(this, seat.No);
             if (seat.Win)
             {
-                seat.Monitor.Print(Constants.MONITOR_WINNER, this);
+                seat.Monitor.Print(DefaultMonitor.Of(Constants.MONITOR_WINNER, this));
             }
             else
             {
-                seat.Monitor.Print(Constants.MONITOR_LOSER, this);
+                seat.Monitor.Print(DefaultMonitor.Of(Constants.MONITOR_LOSER, this));
             }
         }
 

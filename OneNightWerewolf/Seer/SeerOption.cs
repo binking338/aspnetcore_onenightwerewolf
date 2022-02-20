@@ -17,7 +17,7 @@ namespace OneNightWerewolf.Seer
             {
                 if (seat.No == table.Seats[i].No) continue;
                 var choice = $"查看[{table.Seats[i].Player}]";
-                choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
+                choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}"},
                         { "SeeOthersCard", $"{table.Seats[i].No}"}
                     }));
@@ -40,7 +40,7 @@ namespace OneNightWerewolf.Seer
                 for (int j = i+1; j < table.Graves.Length; j++)
                 {
                     var choice = $"查看{table.Graves[i].No}和{table.Graves[j].No}号牌";
-                    choices.Add(choice, new Choice(table.Round.Phase, table.Round.Name, choice, new Dictionary<string, string>() {
+                    choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
                         { "SeeGraveCard", $"{table.Graves[i].No},{table.Graves[j].No}"}
                     }));
