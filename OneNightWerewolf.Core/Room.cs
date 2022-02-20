@@ -9,6 +9,8 @@ namespace OneNightWerewolf.Core
         private Table _table;
         private Game _game;
 
+        public Room() { }
+
         public Room(string name, IRound[] basicRounds, IActionHandler[] actionHandlers, IWinningCampDecisionRule winningCampDecisionRule)
         {
             CreateTime = DateTime.Now;
@@ -19,13 +21,21 @@ namespace OneNightWerewolf.Core
             Players = new List<Player>();
         }
 
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
-        public string GameConfig { get; private set; }
+        public string GameConfig { get; set; }
 
-        public DateTime CreateTime { get; private set; }
+        public DateTime CreateTime { get; set; }
 
-        public List<Player> Players { get; private set; }
+        public List<Player> Players { get; set; }
+
+        public void Clone(Room room)
+        {
+            this.Name =room. Name;
+            this.GameConfig = room.GameConfig;
+            this.CreateTime = room.CreateTime;
+            this.Players = room.Players;
+        }
 
         public int GetPlayerLimit()
         {

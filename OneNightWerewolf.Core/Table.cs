@@ -10,26 +10,28 @@ namespace OneNightWerewolf.Core
         private Seat[] _seats;
         private Grave[] _graves;
 
+        public Table() { }
+
         public Table(Game game)
         {
             this._game = game;
         }
 
-        public DateTime? StartTime { get; private set; }
+        public DateTime? StartTime { get; set; }
 
-        public DateTime? DawnTime { get; private set; }
+        public DateTime? DawnTime { get; set; }
 
-        public DateTime? OverTime { get; private set; }
+        public DateTime? OverTime { get; set; }
 
-        public int RoundIndex { get; private set; } = -1;
+        public int RoundIndex { get; set; } = -1;
 
-        public Camp? WinningCamp { get; private set; }
+        public Camp? WinningCamp { get; set; }
 
-        public Dictionary<string, Choice> SeatChoices { get; private set; } = new Dictionary<string, Choice>();
+        public Dictionary<string, Choice> SeatChoices { get; set; } = new Dictionary<string, Choice>();
 
-        public GameReplay Replay { get; private set; } = new GameReplay();
+        public GameReplay Replay { get; set; } = new GameReplay();
 
-        public DefaultMonitor Monitor { get; private set; } = new DefaultMonitor();
+        public DefaultMonitor Monitor { get; set; } = new DefaultMonitor();
 
         public void Clone(Table table)
         {

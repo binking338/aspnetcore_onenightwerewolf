@@ -19,21 +19,21 @@ namespace OneNightWerewolf.Core
 
         public string FinalCardId { get; set; }
 
-        public string No { get; private set; }
+        public string No { get; set; }
 
-        public string Player { get; private set; }
+        public string Player { get; set; }
 
         public bool Ready { get; set; }
 
         public DefaultMonitor Monitor { get; set; }
 
-        public string TicketVotedFor { get; private set; }
+        public string TicketVotedFor { get; set; }
 
-        public List<string> TicketsReceivedFrom { get; private set; }
+        public List<string> TicketsReceivedFrom { get; set; }
 
-        public int TicketsReceived { get; private set; }
+        public int TicketsReceived { get; set; }
 
-        public bool Dead { get; private set; }
+        public bool Dead { get; set; }
 
         public bool Win { get; set; }
 

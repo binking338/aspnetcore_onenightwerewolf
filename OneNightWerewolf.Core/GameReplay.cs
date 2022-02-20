@@ -14,6 +14,11 @@ namespace OneNightWerewolf.Core
 
     public class GameRoundHistory : IRound
     {
+        public GameRoundHistory()
+        {
+
+        }
+
         public GameRoundHistory(IRound round, Dictionary<string, Choice> playerChoices)
         {
             Phase = round.Phase;
@@ -22,12 +27,12 @@ namespace OneNightWerewolf.Core
             PlayerChoices = playerChoices;
         }
 
-        public Phase Phase { get; }
+        public Phase Phase { get; set; }
 
-        public int Order { get; }
+        public int Order { get; set; }
 
-        public string Name { get; }
+        public string Name { get; set; }
 
-        public Dictionary<string, Choice> PlayerChoices { get; private set; } 
+        public Dictionary<string, Choice> PlayerChoices { get; set; } 
     }
 }

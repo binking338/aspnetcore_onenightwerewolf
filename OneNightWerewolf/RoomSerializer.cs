@@ -25,15 +25,16 @@ namespace OneNightWerewolf
         public Room Deserialize(string serialized)
         {
             var dic = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(serialized);
-            var room = System.Text.Json.JsonSerializer.Deserialize<Room>(dic["room"]);
+            var roomConfig = System.Text.Json.JsonSerializer.Deserialize<Room>(dic["room"]);
             var gameConfig = string.Join(",", System.Text.Json.JsonSerializer.Deserialize<List<string>>(dic["game"]));
 
             var table = System.Text.Json.JsonSerializer.Deserialize<Table>(dic["table"]);
             var seats = System.Text.Json.JsonSerializer.Deserialize<List<Seat>>(dic["seats"]);
             var graves = System.Text.Json.JsonSerializer.Deserialize<List<Grave>>(dic["graves"]);
 
+            var room = new Room(roomConfig.Name, Rounds.AllBasics, ActionHandlers.All, new DefaultWinningCampDecisionRule());
+            room.Clone(roomConfig);
             room.Config(Cards.CreateCards(gameConfig));
-
             room.GetTable().Clone(table);
             for (var i = 0; i < room.GetTable().GetGraves().Length; i++)
             {

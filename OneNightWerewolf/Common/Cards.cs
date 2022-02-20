@@ -14,7 +14,7 @@ namespace OneNightWerewolf.Common
             {
                 var card = CreateCard(no);
                 if (card == null) continue;
-                card.Id = $"{i:##}-{no}";
+                card.Id = $"{i++.ToString("##")}-{no}";
                 cards.Add(card);
             }
             return cards.ToArray();

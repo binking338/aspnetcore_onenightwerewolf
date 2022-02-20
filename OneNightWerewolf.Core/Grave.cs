@@ -15,7 +15,7 @@ namespace OneNightWerewolf.Core
 
         public string FinalCardId { get; set; }
 
-        public string No { get; private set; }
+        public string No { get; set; }
 
         public void Clone(Grave grave)
         {
