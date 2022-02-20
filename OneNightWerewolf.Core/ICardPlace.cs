@@ -3,27 +3,17 @@ namespace OneNightWerewolf.Core
 {
     public interface ICardPlace
     {
-        public ICard OriginCard { get; set; }
+        public string OriginCardId { get; set; }
+        public string FinalCardId { get; set; }
 
-        public ICard FinalCard { get; set; }
+        public ICard GetOriginCard();
 
-        public virtual void SwapCardWith(ICardPlace cardPlace)
-        {
-            var card = FinalCard;
-            FinalCard = cardPlace.FinalCard;
-            cardPlace.FinalCard = card;
-        }
+        public ICard GetFinalCard();
 
-        public virtual void PutCard(ICard card)
-        {
-            OriginCard = card;
-            FinalCard = card;
-        }
+        public void SwapCardWith(ICardPlace cardPlace);
 
-        public virtual void RecycleCard()
-        {
-            OriginCard = null;
-            FinalCard = null;
-        }
+        public void PutCard(ICard card);
+
+        public void RecycleCard();
     }
 }

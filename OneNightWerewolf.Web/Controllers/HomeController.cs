@@ -35,7 +35,7 @@ namespace OneNightWerewolf.Web.Controllers
             {
                 var room = roomRepository.Get(user.RoomId);
                 ViewData["room.id"] = user.RoomId;
-                ViewData["room.roles"] = string.Join(",", room.Game.Cards?.Select(card => card.No));
+                ViewData["room.roles"] = string.Join(",", room.GetGame().Cards?.Select(card => card.No));
             }
             return View(user);
         }

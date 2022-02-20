@@ -14,7 +14,7 @@ namespace OneNightWerewolf.Werewolf
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            if(table.Seats.Count(s => s.OriginCard.Role == Role.Werewolf) > 1)
+            if(table.GetSeats().Count(s => s.GetOriginCard().Role == Role.Werewolf) > 1)
             {
                 var choice = $"查看其他狼人";
                 choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
@@ -37,9 +37,9 @@ namespace OneNightWerewolf.Werewolf
         {
             var choices = new Dictionary<string, Choice>();
 
-            if (table.Seats.Count(s => s.OriginCard.Role == Role.Werewolf) == 1)
+            if (table.GetSeats().Count(s => s.GetOriginCard().Role == Role.Werewolf) == 1)
             {
-                foreach (var grave in table.Graves)
+                foreach (var grave in table.GetGraves())
                 {
                     var choice = $"查看{grave.No}号牌";
                     choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {

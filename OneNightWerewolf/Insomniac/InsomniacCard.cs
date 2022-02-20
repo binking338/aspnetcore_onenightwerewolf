@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Insomniac
 {
     public class InsomniacCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "09";
 
         public string Name => "失眠者";

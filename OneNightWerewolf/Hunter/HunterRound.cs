@@ -14,7 +14,7 @@ namespace OneNightWerewolf.Hunter
 
         public bool Enabled(Table table)
         {
-            if (table.Seats.Any(s => s.FinalCard.Role == Role.Hunter && s.Dead))
+            if (table.GetSeats().Any(s => s.GetFinalCard().Role == Role.Hunter && s.Dead))
             {
                 return true;
             }

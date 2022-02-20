@@ -13,7 +13,7 @@ namespace OneNightWerewolf.Doppelganger
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            foreach (var s in table.Seats)
+            foreach (var s in table.GetSeats())
             {
                 if (s.No == seat.No) continue;
                 var choice = $"化身[{s.Player}]";

@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Minion
 {
     public class MinionCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "03";
 
         public string Name => "爪牙";

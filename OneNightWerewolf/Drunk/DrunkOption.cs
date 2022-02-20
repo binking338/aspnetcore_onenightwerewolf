@@ -13,7 +13,7 @@ namespace OneNightWerewolf.Drunk
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            foreach (var grave in table.Graves)
+            foreach (var grave in table.GetGraves())
             {
                 var choice = $"交换{grave.No}号牌";
                 choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {

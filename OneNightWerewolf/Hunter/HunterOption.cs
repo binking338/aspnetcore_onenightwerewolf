@@ -13,9 +13,9 @@ namespace OneNightWerewolf.Hunter
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            if (seat.FinalCard.Role == Role.Hunter && seat.Dead)
+            if (seat.GetFinalCard().Role == Role.Hunter && seat.Dead)
             {
-                foreach (var s in table.Seats)
+                foreach (var s in table.GetSeats())
                 {
                     if (s.No == seat.No) continue;
                     var choice = $"[{s.Player}]";

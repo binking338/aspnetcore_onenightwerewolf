@@ -4,6 +4,7 @@ namespace OneNightWerewolf.Core
 {
     public interface ICard
     {
+        string Id { get; set; }
         string No { get; }
 
         string Name { get; }
@@ -21,7 +22,7 @@ namespace OneNightWerewolf.Core
 
         public virtual bool JudgeWinning(Table table, string seatNo)
         {
-            var seat = table.Seats.FirstOrDefault(s => s.No == seatNo);
+            var seat = table.GetSeats().FirstOrDefault(s => s.No == seatNo);
             if(seat == null)
             {
                 throw new ArgumentOutOfRangeException(nameof(seatNo));

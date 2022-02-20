@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Robber
 {
     public class RobberCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "06";
 
         public string Name => "强盗";

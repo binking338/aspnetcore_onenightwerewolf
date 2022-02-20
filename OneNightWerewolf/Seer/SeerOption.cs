@@ -13,13 +13,13 @@ namespace OneNightWerewolf.Seer
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            for (var i = 0; i < table.Seats.Length; i++)
+            for (var i = 0; i < table.GetSeats().Length; i++)
             {
-                if (seat.No == table.Seats[i].No) continue;
-                var choice = $"查看[{table.Seats[i].Player}]";
+                if (seat.No == table.GetSeats()[i].No) continue;
+                var choice = $"查看[{table.GetSeats()[i].Player}]";
                 choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}"},
-                        { "SeeOthersCard", $"{table.Seats[i].No}"}
+                        { "SeeOthersCard", $"{table.GetSeats()[i].No}"}
                     }));
             }
             return choices;
@@ -35,14 +35,14 @@ namespace OneNightWerewolf.Seer
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            for (var i = 0; i < table.Graves.Length - 1; i++)
+            for (var i = 0; i < table.GetGraves().Length - 1; i++)
             {
-                for (int j = i+1; j < table.Graves.Length; j++)
+                for (int j = i+1; j < table.GetGraves().Length; j++)
                 {
-                    var choice = $"查看{table.Graves[i].No}和{table.Graves[j].No}号牌";
+                    var choice = $"查看{table.GetGraves()[i].No}和{table.GetGraves()[j].No}号牌";
                     choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
-                        { "SeeGraveCard", $"{table.Graves[i].No},{table.Graves[j].No}"}
+                        { "SeeGraveCard", $"{table.GetGraves()[i].No},{table.GetGraves()[j].No}"}
                     }));
                 }
             }

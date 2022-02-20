@@ -6,57 +6,71 @@ namespace OneNightWerewolf.Core
 {
     public class Room
     {
+        private Table _table;
+        private Game _game;
+
         public Room(string name, IRound[] basicRounds, IActionHandler[] actionHandlers, IWinningCampDecisionRule winningCampDecisionRule)
         {
-            Name = name;
-            Game = new Game(basicRounds, actionHandlers, winningCampDecisionRule);
-            Table = new Table(Game);
-            Players = new List<Player>();
             CreateTime = DateTime.Now;
+            Name = name;
+
+            _game = new Game(basicRounds, actionHandlers, winningCampDecisionRule);
+            _table = new Table(_game);
+            Players = new List<Player>();
         }
 
-        public string Name { get; }
+        public string Name { get; private set; }
 
-        public Table Table { get; }
-
-        public Game Game { get; }
+        public string GameConfig { get; private set; }
 
         public DateTime CreateTime { get; private set; }
 
-        public List<Player> Players { get; }
+        public List<Player> Players { get; private set; }
 
-        public int PlayerLimit { get; private set; }
+        public int GetPlayerLimit()
+        {
+            return (_game?.Cards?.Length ?? 3) - 3;
+        }
 
-        public Player Holder { get; private set; }
+        public Player GetHolder()
+        {
+            return Players?.FirstOrDefault();
+        }
+
+        public Table GetTable()
+        {
+            return this._table;
+        }
+
+        public Game GetGame()
+        {
+            return this._game;
+        }
 
         public bool Config(ICard[] cards)
         {
-            if (!Table.IsGameFinished())
+            if (!GetTable().IsGameFinished())
             {
                 return false;
             }
-            PlayerLimit = cards.Length - 3;
-            Game.New(cards);
-            Table.Config(PlayerLimit, 3);
-            for (int i = 0; i < Players.Count && i < PlayerLimit; i++)
+            GetGame().New(cards);
+            GetTable().Config();
+            GameConfig = string.Join(",", cards.Select(c => c.No));
+            for (int i = 0; i < Players.Count && i < GetPlayerLimit(); i++)
             {
-                Table.Takeseat(Players[i].Nick);
+                GetTable().Takeseat(Players[i].Nick);
             }
             return true;
         }
 
         public bool TakeIn(Player player)
         {
-            if(!Players.Any(u => u.Id == player.Id))
+            if (!Players.Any(u => u.Id == player.Id))
             {
                 Players.Add(player);
-                if(Players.Count == 1)
+                if (!GetTable().IsAllSeatTaken())
                 {
-                    Holder = player;
-                }
-                if (!Table.IsAllSeatTaken())
-                {
-                    Table.Takeseat(player.Nick);
+                    GetTable().Takeseat(player.Nick);
                 }
             }
 
@@ -68,16 +82,8 @@ namespace OneNightWerewolf.Core
             if (Players.Any(u => u.Id == player.Id))
             {
                 player = Players.First(u => u.Id == player.Id);
-                if(player == Holder)
-                {
-                    Holder = null;
-                }
                 Players.Remove(player);
-                if(Holder == null)
-                {
-                    Holder = Players.FirstOrDefault();
-                }
-                Table.Disseat(player.Nick);
+                GetTable().Disseat(player.Nick);
                 return true;
             }
             return false;
@@ -100,38 +106,38 @@ namespace OneNightWerewolf.Core
 
         public bool Start()
         {
-            if (!Table.IsAllSeatReady())
+            if (!GetTable().IsAllSeatReady())
             {
                 return false;
             }
-            if (!Table.IsGameFinished())
+            if (!GetTable().IsGameFinished())
             {
                 return false;
             }
-            Table.NewGame();
-            Table.Recycle();
-            Game.Deal(Table);
-            Table.NextRound();
+            GetTable().NewGame();
+            GetTable().Recycle();
+            GetGame().Deal(GetTable());
+            GetTable().NextRound();
             return true;
         }
 
         public void ForceStop()
         {
-            Table.NewGame();
-            Table.Recycle();
+            GetTable().NewGame();
+            GetTable().Recycle();
         }
 
         private void PollingCheck()
         {
-            if (Table.IsRoundFinished())
+            if (GetTable().IsRoundFinished())
             {
-                Table.NextRound();
+                GetTable().NextRound();
             }
         }
 
         public void Action(Player player, Choice choice)
         {
-            if(!Table.MakeChoice(Table.FindSeatByNick(player.Nick).No, choice))
+            if (!GetTable().MakeChoice(GetTable().FindSeatByNick(player.Nick).No, choice))
             {
                 throw new InvalidOperationException("不能重复选择操作选项");
             }
@@ -140,7 +146,7 @@ namespace OneNightWerewolf.Core
 
         public IDictionary<string, Choice> Choices(Player player)
         {
-            var choices = Table.GetChoices(Table.FindSeatByNick(player.Nick).No);
+            var choices = GetTable().GetChoices(GetTable().FindSeatByNick(player.Nick).No);
             return choices;
         }
 

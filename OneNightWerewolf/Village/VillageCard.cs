@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Village
 {
     public class VillageCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "01";
 
         public string Name => "村民";

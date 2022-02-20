@@ -71,7 +71,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (roomRepository.Exist(roomId))
             {
                 var room = roomRepository.Get(roomId);
-                if (room.Holder?.Id != user.Id)
+                if (room.GetHolder()?.Id != user.Id)
                 {
                     return Response<bool>.Error(2, "房间已存在，你不是该房间房主");
                 }
@@ -196,7 +196,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             return Response<PositionInfo>.Return(new PositionInfo()
             {
                 RoomId = room?.Name,
-                IsHolder = room?.Holder?.Id == user.Id
+                IsHolder = room?.GetHolder()?.Id == user.Id
             });
         }
 
@@ -259,9 +259,9 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<bool>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            if (room?.Holder?.Id != user.Id)
+            if (room.GetHolder()?.Id != user.Id)
                 return Response<bool>.Error(13, $"只有房主能踢人");
-            if (room?.Holder.Id == id)
+            if (room.GetHolder().Id == id)
                 return Response<bool>.Error(14, $"房主不能被踢");
 
             var player = room.FindPlayer(id);
@@ -294,11 +294,11 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<bool>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            if (room?.Holder?.Id != user.Id)
+            if (room.GetHolder()?.Id != user.Id)
                 return Response<bool>.Error(10, "房主才能开始游戏");
-            if (!room.Table.IsAllSeatReady())
+            if (!room.GetTable().IsAllSeatReady())
                 return Response<bool>.Error(9, "人数不齐或未准备");
-            if (!room.Table.IsGameFinished())
+            if (!room.GetTable().IsGameFinished())
                 return Response<bool>.Return(true);
             return Response<bool>.Return(room.Start());
         }
@@ -312,9 +312,9 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<bool>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            if (room?.Holder?.Id != user.Id)
+            if (room.GetHolder()?.Id != user.Id)
                 return Response<bool>.Error(15, "房主才能结束游戏");
-            if (room.Table.IsGameFinished())
+            if (room.GetTable().IsGameFinished())
                 return Response<bool>.Return(true);
             room.ForceStop();
             return Response<bool>.Return(true);
@@ -348,7 +348,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (string.IsNullOrEmpty(user.RoomId))
                 return Response<string[]>.Error(7, $"不在任何房间中");
             var room = roomRepository.Get(user.RoomId);
-            var roles = room.Game.Cards.Select(card => card.No).ToArray();
+            var roles = room.GetGame().Cards.Select(card => card.No).ToArray();
             return Response<string[]>.Return(roles);
         }
 
@@ -369,11 +369,11 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (player == null)
                 return Response<ChoicesInfo>.Error(8, $"不在房间[{user.RoomId}]中");
             // 是否已行动（做了决定）
-            var seat = room.Table.FindSeatByNick(user.Nick);
-            var choiceMaded = room.Table.SeatChoices.ContainsKey(seat.No);
+            var seat = room.GetTable().FindSeatByNick(user.Nick);
+            var choiceMaded = room.GetTable().SeatChoices.ContainsKey(seat.No);
             var choices = choiceMaded ? null : room.Choices(player);
             ChoicesInfo result = ToChoicesInfo(room, choices?.Keys.ToArray());
-            result.Messages = result.Game.InGame ? GetMessageInfos(room, room.Table.FindSeatByNick(player.Nick).No)
+            result.Messages = result.Game.InGame ? GetMessageInfos(room, room.GetTable().FindSeatByNick(player.Nick).No)
                 .Where(m => m.Round.Index == result.Round.Index).ToArray() : new MessageInfo[0];
             return Response<ChoicesInfo>.Return(result);
         }
@@ -395,7 +395,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
             if (player == null)
                 return Response<List<MessageInfo>>.Error(8, $"不在房间[{user.RoomId}]中");
 
-            var messages = GetMessageInfos(room, room.Table.FindSeatByNick(player.Nick).No);
+            var messages = GetMessageInfos(room, room.GetTable().FindSeatByNick(player.Nick).No);
 
             return Response<List<MessageInfo>>.Return(messages);
         }
@@ -422,7 +422,7 @@ namespace OneNightWerewolf.Web.Controllers.Api
 
             var choices = room.Choices(player);
             room.Action(player, choices[choice]);
-            result.Messages = result.Game.InGame ? GetMessageInfos(room, room.Table.FindSeatByNick(player.Nick).No)
+            result.Messages = result.Game.InGame ? GetMessageInfos(room, room.GetTable().FindSeatByNick(player.Nick).No)
                 .Where(m => m.Round.Index == result.Round.Index).ToArray() : new MessageInfo[0];
 
             return Response<ChoicesInfo>.Return(result);
@@ -433,8 +433,8 @@ namespace OneNightWerewolf.Web.Controllers.Api
             var roomInfo = new RoomInfo()
             {
                 Id = room.Name,
-                Cards = room.Game.Cards.Select(c => c.No).ToArray(),
-                PlayerLimit = room.PlayerLimit,
+                Cards = room.GetGame().Cards.Select(c => c.No).ToArray(),
+                PlayerLimit = room.GetPlayerLimit(),
                 Players = room.Players.ToArray(),
             };
             return roomInfo;
@@ -454,10 +454,10 @@ namespace OneNightWerewolf.Web.Controllers.Api
         {
             var gameInfo = new GameInfo()
             {
-                InGame = !room.Table.IsGameFinished(),
-                StartTime = ToTimestamp(room.Table.StartTime),
-                DawnTime = ToTimestamp(room.Table.DawnTime),
-                OverTime = ToTimestamp(room.Table.OverTime)
+                InGame = !room.GetTable().IsGameFinished(),
+                StartTime = ToTimestamp(room.GetTable().StartTime),
+                DawnTime = ToTimestamp(room.GetTable().DawnTime),
+                OverTime = ToTimestamp(room.GetTable().OverTime)
             };
             return gameInfo;
         }
@@ -470,14 +470,14 @@ namespace OneNightWerewolf.Web.Controllers.Api
 
         private RoundInfo ToRoundInfo(Room room)
         {
-            var roundInfo = (room?.Table?.GetRound() != null) ?
+            var roundInfo = (room?.GetTable()?.GetRound() != null) ?
                 new RoundInfo()
                 {
-                    Index = room.Table.RoundIndex,
-                    Phase = room.Table.GetRound().Phase,
-                    PhaseName = room.Table.GetRound().Phase.Readable(),
-                    Order = room.Table.GetRound().Order,
-                    Name = room.Table.GetRound().Name
+                    Index = room.GetTable().RoundIndex,
+                    Phase = room.GetTable().GetRound().Phase,
+                    PhaseName = room.GetTable().GetRound().Phase.Readable(),
+                    Order = room.GetTable().GetRound().Order,
+                    Name = room.GetTable().GetRound().Name
                 } : new RoundInfo();
             return roundInfo;
         }
@@ -485,8 +485,8 @@ namespace OneNightWerewolf.Web.Controllers.Api
         private List<MessageInfo> GetMessageInfos(Room room, string seatNo)
         {
             var messages = new List<MessageInfo>();
-            messages.AddRange(room.Table.Monitor.Messages.Select(msg => ToMessageInfo("GM", msg)));
-            messages.AddRange(room.Table.FindSeat(seatNo).Monitor.Messages.Select(msg => ToMessageInfo("", msg)));
+            messages.AddRange(room.GetTable().Monitor.Messages.Select(msg => ToMessageInfo("GM", msg)));
+            messages.AddRange(room.GetTable().FindSeat(seatNo).Monitor.Messages.Select(msg => ToMessageInfo("", msg)));
             messages = messages.OrderBy(m => m.Time).ToList();
             return messages;
         }

@@ -6,16 +6,14 @@ namespace OneNightWerewolf.Core
 {
     public class Table
     {
+        private Game _game;
+        private Seat[] _seats;
+        private Grave[] _graves;
+
         public Table(Game game)
         {
-            Game = game;
+            this._game = game;
         }
-
-        public Game Game { get; private set; }
-
-        public Seat[] Seats { get; private set; }
-
-        public Grave[] Graves { get; private set; }
 
         public DateTime? StartTime { get; private set; }
 
@@ -35,17 +33,21 @@ namespace OneNightWerewolf.Core
 
         #region Game
 
-        public void Config(int seats, int graves)
+        public Game GetGame() { return _game; }
+
+        public void Config()
         {
-            Seats = new Seat[seats];
+            int seats = GetGame().Cards.Length - 3;
+            int graves = 3;
+            _seats = new Seat[seats];
             for (int i = 0; i < seats; i++)
             {
-                Seats[i] = new Seat((i + 1).ToString());
+                GetSeats()[i] = new Seat((i + 1).ToString()).Assosiate(this);
             }
-            Graves = new Grave[graves];
+            _graves = new Grave[graves];
             for (int i = 0; i < graves; i++)
             {
-                Graves[i] = new Grave((i + 1).ToString());
+                GetGraves()[i] = new Grave((i + 1).ToString()).Assosiate(this);
             }
         }
 
@@ -67,7 +69,8 @@ namespace OneNightWerewolf.Core
 
         public IRound GetRound()
         {
-            return Game.Rounds[RoundIndex];
+            if (RoundIndex < 0 || RoundIndex > GetGame().Rounds?.Length) return null;
+            return GetGame().Rounds[RoundIndex];
         }
 
         public bool IsGameFinished()
@@ -77,7 +80,7 @@ namespace OneNightWerewolf.Core
 
         public void Recycle()
         {
-            foreach (var seat in Seats)
+            foreach (var seat in GetSeats())
             {
                 (seat as ICardPlace).RecycleCard();
             }
@@ -85,16 +88,16 @@ namespace OneNightWerewolf.Core
 
         public void Deal(ICard[] cards)
         {
-            if (cards.Length != Seats.Length + Graves.Length)
+            if (cards.Length != GetSeats().Length + GetGraves().Length)
             {
                 throw new ArgumentException("牌不够");
             }
             var i = 0;
-            foreach (var seat in Seats)
+            foreach (var seat in GetSeats())
             {
                 (seat as ICardPlace).PutCard(cards[i++]);
             }
-            foreach (var grave in Graves)
+            foreach (var grave in GetGraves())
             {
                 (grave as ICardPlace).PutCard(cards[i++]);
             }
@@ -102,14 +105,14 @@ namespace OneNightWerewolf.Core
 
         public void Tickets()
         {
-            if (this.Seats.All(s => s.TicketsReceived == 1))
+            if (this.GetSeats().All(s => s.TicketsReceived == 1))
             {
                 // no one die
             }
             else
             {
-                var max = this.Seats.Select(s => s.TicketsReceived).Max();
-                this.Seats.Where(s => s.TicketsReceived == max).ToList()
+                var max = this.GetSeats().Select(s => s.TicketsReceived).Max();
+                this.GetSeats().Where(s => s.TicketsReceived == max).ToList()
                     .ForEach(s => s.Die());
             }
         }
@@ -117,7 +120,7 @@ namespace OneNightWerewolf.Core
         public void JudgeWinningCamp()
         {
             if (WinningCamp != null) return;
-            WinningCamp = Game.WinningCampDecisionRule.Judge(this);
+            WinningCamp = GetGame().WinningCampDecisionRule.Judge(this);
             switch (WinningCamp)
             {
                 case Camp.None:
@@ -134,7 +137,7 @@ namespace OneNightWerewolf.Core
 
         public void NextRound()
         {
-            if(GetRound() == null && RoundIndex == -1)
+            if (GetRound() == null && RoundIndex == -1)
             {
                 RoundIndex = 0;
                 StartTime = DateTime.Now;
@@ -151,14 +154,14 @@ namespace OneNightWerewolf.Core
                 RoundIndex++;
 
             } while (!GetRound().Enabled(this));
-            if(GetRound().Phase >= Phase.Dawn && !DawnTime.HasValue)
+            if (GetRound().Phase >= Phase.Dawn && !DawnTime.HasValue)
             {
                 DawnTime = DateTime.Now;
             }
-            else if(GetRound().Phase == Phase.Over && !OverTime.HasValue)
+            else if (GetRound().Phase == Phase.Over && !OverTime.HasValue)
             {
                 OverTime = DateTime.Now;
-                foreach(var seat in Seats)
+                foreach (var seat in GetSeats())
                 {
                     seat.Ready = false;
                 }
@@ -167,7 +170,7 @@ namespace OneNightWerewolf.Core
 
         public bool IsRoundFinished()
         {
-            if (SeatChoices.Count == Seats.Length)
+            if (SeatChoices.Count == GetSeats().Length)
             {
                 return true;
             }
@@ -176,7 +179,7 @@ namespace OneNightWerewolf.Core
 
         public bool IsLastRound()
         {
-            if (Game.Rounds.Length == RoundIndex + 1)
+            if (GetGame().Rounds.Length == RoundIndex + 1)
             {
                 return true;
             }
@@ -185,12 +188,22 @@ namespace OneNightWerewolf.Core
 
         #endregion
 
+        public Seat[] GetSeats()
+        {
+            return _seats;
+        }
+
+        public Grave[] GetGraves()
+        {
+            return _graves;
+        }
+
         #region Player
 
         public bool IsAllSeatTaken()
         {
-            if (Seats == null) return false;
-            foreach (var seat in Seats)
+            if (GetSeats() == null) return false;
+            foreach (var seat in GetSeats())
             {
                 if (string.IsNullOrWhiteSpace(seat.Player))
                 {
@@ -202,8 +215,8 @@ namespace OneNightWerewolf.Core
 
         public bool IsAllSeatReady()
         {
-            if (Seats == null) return false;
-            foreach (var seat in Seats)
+            if (GetSeats() == null) return false;
+            foreach (var seat in GetSeats())
             {
                 if (string.IsNullOrWhiteSpace(seat.Player) || !seat.Ready)
                 {
@@ -219,7 +232,7 @@ namespace OneNightWerewolf.Core
             {
                 return false;
             }
-            foreach (var seat in Seats)
+            foreach (var seat in GetSeats())
             {
                 if (string.IsNullOrWhiteSpace(seat.Player))
                 {
@@ -282,11 +295,11 @@ namespace OneNightWerewolf.Core
             var ability = GetAbility(seat.No);
             var option = ability.Options?.FirstOrDefault(option => option.Name == choice.Data["Option"]);
             var actions = option == null ? new Action[] { Action.None } : option.Actions;
-            if (Game.ActionHandlers != null)
+            if (GetGame().ActionHandlers != null)
             {
                 foreach (var action in actions)
                 {
-                    foreach (var actionHandler in Game.ActionHandlers)
+                    foreach (var actionHandler in GetGame().ActionHandlers)
                     {
                         if (action == actionHandler.Action) actionHandler.Handle(this, seat, choice);
                     }
@@ -299,7 +312,7 @@ namespace OneNightWerewolf.Core
         {
             var seat = FindSeat(seatNo);
             if (GetRound() == null) return null;
-            var card = GetRound().Phase > Phase.Dawn ? seat.FinalCard : seat.OriginCard;
+            var card = GetRound().Phase > Phase.Dawn ? seat.GetFinalCard() : seat.GetOriginCard();
             foreach (var ability in card.Abilities)
             {
                 if (ability.TriggerCondition?.Invoke(GetRound()) == true)
@@ -315,13 +328,13 @@ namespace OneNightWerewolf.Core
             var seat = FindSeat(seatNo);
 
             List<Seat> roleSeats = new List<Seat>();
-            foreach (var s in Seats)
+            foreach (var s in GetSeats())
             {
                 if (s.No == seat.No)
                 {
                     continue;
                 }
-                if (s.OriginCard.Role == role)
+                if (s.GetOriginCard().Role == role)
                 {
                     roleSeats.Add(s);
                 }
@@ -340,7 +353,7 @@ namespace OneNightWerewolf.Core
         {
             var seat = FindSeat(seatNo);
 
-            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_MY_CARD, seat.Player, seat.FinalCard.Name), this));
+            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_MY_CARD, seat.Player, seat.GetFinalCard().Name), this));
         }
 
         public void SeeCardInSeat(string seatNo, string targetSeatNo)
@@ -348,14 +361,14 @@ namespace OneNightWerewolf.Core
             var seat = FindSeat(seatNo);
             var target = FindSeat(targetSeatNo);
 
-            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_OTHERS_CARD, target, target.FinalCard.Name), this));
+            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_OTHERS_CARD, target.Player, target.GetFinalCard().Name), this));
         }
 
         public void SeeCardInGrave(string seatNo, string targetGraveNo)
         {
             var seat = FindSeat(seatNo);
             var grave = FindGrave(targetGraveNo);
-            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_GRAVE_CARD, grave.No, grave.FinalCard.Name), this));
+            seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SEE_GRAVE_CARD, grave.No, grave.GetFinalCard().Name), this));
         }
 
         public void SwapCardsBetweenSeats(string seatNo, string targetSeatNo1, string targetSeatNo2)
@@ -411,11 +424,11 @@ namespace OneNightWerewolf.Core
             var seat = FindSeat(seatNo);
             if (seat.Dead)
             {
-                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_DEAD, seat.FinalCard.Name, seat.TicketsReceived), this));
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_DEAD, seat.GetFinalCard().Name, seat.TicketsReceived), this));
             }
             else
             {
-                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SURVIVOR, seat.FinalCard.Name, seat.TicketsReceived), this));
+                seat.Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_SURVIVOR, seat.GetFinalCard().Name, seat.TicketsReceived), this));
             }
         }
 
@@ -424,7 +437,7 @@ namespace OneNightWerewolf.Core
             var hunterSeat = FindSeat(hunterSeatNo);
             var beHuntedSeat = FindSeat(beHuntedSeatNo);
             beHuntedSeat.Die();
-            Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_HUNT, hunterSeat.No, beHuntedSeat.Player), this));
+            Monitor.Print(DefaultMonitor.Of(string.Format(Constants.MONITOR_HUNT, hunterSeat.Player, beHuntedSeat.Player), this));
         }
 
 
@@ -432,7 +445,7 @@ namespace OneNightWerewolf.Core
         {
             this.JudgeWinningCamp();
             var seat = FindSeat(seatNo);
-            seat.Win = seat.FinalCard.JudgeWinning(this, seat.No);
+            seat.Win = seat.GetFinalCard().JudgeWinning(this, seat.No);
             if (seat.Win)
             {
                 seat.Monitor.Print(DefaultMonitor.Of(Constants.MONITOR_WINNER, this));
@@ -445,7 +458,7 @@ namespace OneNightWerewolf.Core
 
         public Seat FindSeatByNick(string player)
         {
-            foreach (var seat in Seats)
+            foreach (var seat in GetSeats())
             {
                 if (string.CompareOrdinal(player, seat.Player) == 0)
                 {
@@ -457,7 +470,7 @@ namespace OneNightWerewolf.Core
 
         public Seat FindSeat(string no)
         {
-            foreach (var seat in Seats)
+            foreach (var seat in GetSeats())
             {
                 if (string.CompareOrdinal(no, seat.No) == 0)
                 {
@@ -469,9 +482,9 @@ namespace OneNightWerewolf.Core
 
         public Grave FindGrave(string no)
         {
-            foreach (var grave in Graves)
+            foreach (var grave in GetGraves())
             {
-                if(string.CompareOrdinal(no, grave.No) == 0)
+                if (string.CompareOrdinal(no, grave.No) == 0)
                 {
                     return grave;
                 }

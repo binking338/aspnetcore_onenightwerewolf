@@ -9,10 +9,12 @@ namespace OneNightWerewolf.Common
         public static ICard[] CreateCards(string cardNo)
         {
             List<ICard> cards = new List<ICard>();
+            var i = 0;
             foreach(var no in cardNo.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
             {
                 var card = CreateCard(no);
                 if (card == null) continue;
+                card.Id = $"{i:##}-{no}";
                 cards.Add(card);
             }
             return cards.ToArray();

@@ -30,7 +30,7 @@ namespace OneNightWerewolf.Web.Models
         public List<Room> List()
         {
             return roomStorage.Values
-                .OrderByDescending(room => room.Table.StartTime?.Ticks ?? 0)
+                .OrderByDescending(room => room.GetTable().StartTime?.Ticks ?? 0)
                 .ThenBy(room => room.Name)
                 .ToList();
         }

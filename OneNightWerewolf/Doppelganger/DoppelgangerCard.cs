@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Doppelganger
 {
     public class DoppelgangerCard : ICard
     {
+        public string Id { get; set; }
+
         private ICard card = null;
 
         public string No => "12";

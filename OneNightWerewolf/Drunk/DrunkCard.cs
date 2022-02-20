@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Drunk
 {
     public class DrunkCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "08";
 
         public string Name => "酒鬼";

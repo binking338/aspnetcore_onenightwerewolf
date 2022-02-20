@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Werewolf
 {
     public class WerewolfCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "02";
 
         public string Name => "狼人";

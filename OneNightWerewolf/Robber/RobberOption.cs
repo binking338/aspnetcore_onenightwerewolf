@@ -13,13 +13,13 @@ namespace OneNightWerewolf.Robber
         public IDictionary<string, Choice> GenerateChoices(Seat seat, Table table)
         {
             var choices = new Dictionary<string, Choice>();
-            for (var i = 0; i < table.Seats.Length; i++)
+            for (var i = 0; i < table.GetSeats().Length; i++)
             {
-                if (seat.No == table.Seats[i].No) continue;
-                var choice = $"交换[{table.Seats[i].Player}]";
+                if (seat.No == table.GetSeats()[i].No) continue;
+                var choice = $"交换[{table.GetSeats()[i].Player}]";
                 choices.Add(choice, new Choice(table.GetRound().Phase, table.GetRound().Name, choice, new Dictionary<string, string>() {
                         { "Option", $"{Name}" },
-                        { "SwapWithOthers", $"{table.Seats[i].No}"},
+                        { "SwapWithOthers", $"{table.GetSeats()[i].No}"},
                         { "SeeMyCard", $"{seat.No}"}
                     }));
             }

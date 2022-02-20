@@ -8,11 +8,11 @@ namespace OneNightWerewolf.Common
     {
         public Camp Judge(Table table)
         {
-            var deaths = table.Seats.Where(s => s.Dead);
-            var hasWerewolf = table.Seats.Any(s => s.FinalCard.Role == Role.Werewolf);
-            var hasMinion = table.Seats.Any(s => s.FinalCard.Role == Role.Minion);
+            var deaths = table.GetSeats().Where(s => s.Dead);
+            var hasWerewolf = table.GetSeats().Any(s => s.GetFinalCard().Role == Role.Werewolf);
+            var hasMinion = table.GetSeats().Any(s => s.GetFinalCard().Role == Role.Minion);
 
-            if (deaths.Count() > 0 && deaths.All(s => s.FinalCard.Role == Role.Tanner))
+            if (deaths.Count() > 0 && deaths.All(s => s.GetFinalCard().Role == Role.Tanner))
             {
                 // 只死了皮匠
                 return Camp.None;
@@ -20,7 +20,7 @@ namespace OneNightWerewolf.Common
             else if (hasWerewolf)
             {
                 // 有狼人，死任一狼人
-                if (deaths.Any(s => s.FinalCard.Role == Role.Werewolf))
+                if (deaths.Any(s => s.GetFinalCard().Role == Role.Werewolf))
                 {
                     // 村民赢
                     return Camp.Villiage;
@@ -34,12 +34,12 @@ namespace OneNightWerewolf.Common
             else if (hasMinion)
             {
                 // 没狼人 有爪牙
-                if (deaths.Any(s => s.FinalCard.Role == Role.Minion) && !deaths.Any(s => s.FinalCard.Role != Role.Minion && s.FinalCard.Role != Role.Tanner))
+                if (deaths.Any(s => s.GetFinalCard().Role == Role.Minion) && !deaths.Any(s => s.GetFinalCard().Role != Role.Minion && s.GetFinalCard().Role != Role.Tanner))
                 {
                     // 村民赢
                     return Camp.Villiage;
                 }
-                else if (!deaths.Any(s => s.FinalCard.Role == Role.Minion) && deaths.Any(s => s.FinalCard.Role != Role.Minion && s.FinalCard.Role != Role.Tanner))
+                else if (!deaths.Any(s => s.GetFinalCard().Role == Role.Minion) && deaths.Any(s => s.GetFinalCard().Role != Role.Minion && s.GetFinalCard().Role != Role.Tanner))
                 {
                     // 狼人赢
                     return Camp.Werewolf;

@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Mason
 {
     public class MasonCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "04";
 
         public string Name => "守夜人";

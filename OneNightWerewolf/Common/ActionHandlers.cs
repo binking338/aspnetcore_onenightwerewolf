@@ -153,9 +153,9 @@ namespace OneNightWerewolf.Common
             if (!choice.Data.ContainsKey(Action.ToString()) || string.IsNullOrWhiteSpace(choice.Data[Action.ToString()])) return;
             var copyFromSeatNo = choice.Data[Action.ToString()];
             var copyFromSeat = table.FindSeat(copyFromSeatNo);
-            if(seat.OriginCard is DoppelgangerCard doppelgangerCard)
+            if(seat.GetOriginCard() is DoppelgangerCard doppelgangerCard)
             {
-                doppelgangerCard.Copy(copyFromSeat.FinalCard);
+                doppelgangerCard.Copy(copyFromSeat.GetFinalCard());
             }
         }
     }

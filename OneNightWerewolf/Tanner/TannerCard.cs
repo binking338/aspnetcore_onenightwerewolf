@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Tanner
 {
     public class TannerCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "11";
 
         public string Name => "皮匠";

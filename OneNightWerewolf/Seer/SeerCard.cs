@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Seer
 {
     public class SeerCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "05";
 
         public string Name => "预言家";

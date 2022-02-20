@@ -6,6 +6,8 @@ namespace OneNightWerewolf.Troublemaker
 {
     public class TroublemakerCard : ICard
     {
+        public string Id { get; set; }
+
         public string No => "07";
 
         public string Name => "捣蛋鬼";

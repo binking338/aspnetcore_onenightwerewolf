@@ -15,14 +15,14 @@ namespace OneNightWerewolf.Console
             room.Config(Cards.CreateCards("01,01,01,02,02,03,04,04,05,06,07,08,09,10,11,12"));
 
             List<Player> users = new List<Player>();
-            for (var i = 0; i < room.PlayerLimit; i++)
+            for (var i = 0; i < room.GetPlayerLimit(); i++)
             {
                 Player user = new Player($"136758890{i.ToString("00")}", $"user{i}");
                 users.Add(user);
             }
 
             // 
-            for (var i=0; i < room.PlayerLimit; i++)
+            for (var i=0; i < room.GetPlayerLimit(); i++)
             {
                 room.TakeIn(users[i]);
             }
@@ -36,7 +36,7 @@ namespace OneNightWerewolf.Console
                 //
                 do
                 {
-                    for (var i = 0; i < room.PlayerLimit; i++)
+                    for (var i = 0; i < room.GetPlayerLimit(); i++)
                     {
                         var choices = room.Choices(users[i]);
                         System.Console.WriteLine($"{users[i].Nick} 选项开始:");
@@ -50,18 +50,18 @@ namespace OneNightWerewolf.Console
                     }
 
                 }
-                while (!room.Table.IsGameFinished());
+                while (!room.GetTable().IsGameFinished());
 
 
-                foreach(var msg in room.Table.Monitor.Messages)
+                foreach(var msg in room.GetTable().Monitor.Messages)
                 {
                     System.Console.WriteLine($"public : [{msg.Phase }] {msg.Content}");
                 }
-                for (var i = 0; i < room.PlayerLimit; i++)
+                for (var i = 0; i < room.GetPlayerLimit(); i++)
                 {
-                    foreach (var msg in room.Table.Seats[i].Monitor.Messages)
+                    foreach (var msg in room.GetTable().GetSeats()[i].Monitor.Messages)
                     {
-                        System.Console.WriteLine($"seat{room.Table.Seats[i].No} : [{msg.Phase }] {msg.Content}");
+                        System.Console.WriteLine($"seat{room.GetTable().GetSeats()[i].No} : [{msg.Phase }] {msg.Content}");
                     }
                 }
                 //room.ForceStop();
