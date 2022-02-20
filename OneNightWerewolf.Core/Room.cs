@@ -32,11 +32,6 @@ namespace OneNightWerewolf.Core
             return (_game?.Cards?.Length ?? 3) - 3;
         }
 
-        public Player GetHolder()
-        {
-            return Players?.FirstOrDefault();
-        }
-
         public Table GetTable()
         {
             return this._table;

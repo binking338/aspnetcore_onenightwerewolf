@@ -17,6 +17,13 @@ namespace OneNightWerewolf.Core
 
         public string No { get; private set; }
 
+        public void Clone(Grave grave)
+        {
+            this.OriginCardId = grave.OriginCardId;
+            this.FinalCardId = grave.FinalCardId;
+            this.No = grave.No;
+        }
+
         public Grave Assosiate(Table table)
         {
             _table = table;

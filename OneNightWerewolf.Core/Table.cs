@@ -25,11 +25,23 @@ namespace OneNightWerewolf.Core
 
         public Camp? WinningCamp { get; private set; }
 
-        public Dictionary<string, Choice> SeatChoices { get; } = new Dictionary<string, Choice>();
+        public Dictionary<string, Choice> SeatChoices { get; private set; } = new Dictionary<string, Choice>();
 
-        public GameReplay Replay { get; } = new GameReplay();
+        public GameReplay Replay { get; private set; } = new GameReplay();
 
-        public DefaultMonitor Monitor { get; set; } = new DefaultMonitor();
+        public DefaultMonitor Monitor { get; private set; } = new DefaultMonitor();
+
+        public void Clone(Table table)
+        {
+            this.StartTime = table.StartTime;
+            this.DawnTime = table.DawnTime;
+            this.OverTime = table.OverTime;
+            this.RoundIndex = table.RoundIndex;
+            this.WinningCamp = table.WinningCamp;
+            this.SeatChoices = table.SeatChoices;
+            this.Replay = table.Replay;
+            this.Monitor = table.Monitor;
+        }
 
         #region Game
 

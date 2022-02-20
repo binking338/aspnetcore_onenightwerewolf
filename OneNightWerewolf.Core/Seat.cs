@@ -37,6 +37,21 @@ namespace OneNightWerewolf.Core
 
         public bool Win { get; set; }
 
+        public void Clone(Seat seat)
+        {
+            this.OriginCardId = seat.OriginCardId;
+            this.FinalCardId = seat.FinalCardId;
+            this.No = seat.No;
+            this.Player = seat.Player;
+            this.Ready = seat.Ready;
+            this.Monitor = seat.Monitor;
+            this.TicketVotedFor = seat.TicketVotedFor;
+            this.TicketsReceivedFrom = seat.TicketsReceivedFrom;
+            this.TicketsReceived = seat.TicketsReceived;
+            this.Dead = seat.Dead;
+            this.Win = seat.Win;
+        }
+
         public Seat Assosiate(Table table)
         {
             _table = table;
